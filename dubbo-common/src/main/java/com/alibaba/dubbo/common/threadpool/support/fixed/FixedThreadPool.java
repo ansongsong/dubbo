@@ -29,8 +29,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 1. 固定大小线程池，启动时建立线程，不关闭，一直持有
  * Creates a thread pool that reuses a fixed number of threads
- *
  * @see java.util.concurrent.Executors#newFixedThreadPool(int)
  */
 public class FixedThreadPool implements ThreadPool {
