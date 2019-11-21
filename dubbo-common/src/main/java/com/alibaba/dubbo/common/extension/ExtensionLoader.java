@@ -44,6 +44,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
 /**
+ * 拓展加载器。这是 Dubbo SPI 的核心。
  * Load dubbo extensions
  * <ul>
  * <li>auto inject dependency extension </li>
@@ -67,24 +68,93 @@ public class ExtensionLoader<T> {
     private static final String DUBBO_INTERNAL_DIRECTORY = DUBBO_DIRECTORY + "internal/";
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
-
+    /*
+     * 拓展加载器集合
+     * 每个Class - 都有一个 - 扩展类加载器
+     * 安松 - test - eg：class
+     * key：拓展接口
+     */
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
-
+    /**
+     * 拓展实现类集合
+     *
+     * key：拓展实现类
+     * value：拓展对象。
+     *
+     * 例如，key 为 Class<AccessLogFilter>
+     *  value 为 AccessLogFilter 对象
+     */
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<Class<?>, Object>();
 
     // ==============================
-
+    /**
+     * 拓展接口。
+     * 安松 - test - eg：interface com.alibaba.dubbo.rpc.Protocol
+     */
     private final Class<?> type;
-
+    /**
+     * 对象工厂
+     *
+     * 用于调用 {@link #injectExtension(Object)} 方法，向拓展对象注入依赖属性。
+     *
+     * 例如，StubProxyFactoryWrapper 中有 `Protocol protocol` 属性。
+     */
     private final ExtensionFactory objectFactory;
-
+    /**
+     * 缓存的拓展名与拓展类的映射。
+     * 安松 - 亲测 - eg：class com.alibaba.dubbo.registry.integration.RegistryProtocol  registry
+     * 和 {@link #cachedClasses} 的 KV 对调。
+     *
+     * 通过 {@link #loadExtensionClasses} 加载
+     */
     private final ConcurrentMap<Class<?>, String> cachedNames = new ConcurrentHashMap<Class<?>, String>();
-
+    /**
+     * 缓存的拓展实现类集合。
+     *
+     * 不包含如下两种类型：
+     *  1. 自适应拓展实现类。例如 AdaptiveExtensionFactory
+     *  2. 带唯一参数为拓展接口的构造方法的实现类，或者说拓展 Wrapper 实现类。例如，ProtocolFilterWrapper 。
+     *   拓展 Wrapper 实现类，会添加到 {@link #cachedWrapperClasses} 中
+     *
+     * 安松 - 亲测 - eg:
+     * 0 = {HashMap$Node@12427} "registry" -> "class com.alibaba.dubbo.registry.integration.RegistryProtocol"
+     * 1 = {HashMap$Node@12428} "injvm" -> "class com.alibaba.dubbo.rpc.protocol.injvm.InjvmProtocol"
+     * 2 = {HashMap$Node@12429} "thrift" -> "class com.alibaba.dubbo.rpc.protocol.thrift.ThriftProtocol"
+     * 3 = {HashMap$Node@12430} "mock" -> "class com.alibaba.dubbo.rpc.support.MockProtocol"
+     * 4 = {HashMap$Node@12431} "dubbo" -> "class com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol"
+     * 5 = {HashMap$Node@12432} "redis" -> "class com.alibaba.dubbo.rpc.protocol.redis.RedisProtocol"
+     * 6 = {HashMap$Node@12433} "rmi" -> "class com.alibaba.dubbo.rpc.protocol.rmi.RmiProtocol"
+     *
+     * 通过 {@link #loadExtensionClasses} 加载
+     */
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<Map<String, Class<?>>>();
 
+    /**
+     * 拓展名与 @Activate 的映射
+     *
+     * 例如，AccessLogFilter。
+     *
+     * 用于 {@link #getActivateExtension(URL, String)}
+     */
     private final Map<String, Activate> cachedActivates = new ConcurrentHashMap<String, Activate>();
+    /**
+     * 缓存的拓展对象集合
+     *
+     * key：拓展名
+     * value：拓展对象
+     *
+     * 例如，Protocol 拓展
+     *      key：dubbo value：DubboProtocol
+     *      key：injvm value：InjvmProtocol
+     *
+     * 通过 {@link #loadExtensionClasses} 加载
+     */
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<String, Holder<Object>>();
+    /**
+     * 缓存的自适应( Adaptive )拓展对象
+     */
     private final Holder<Object> cachedAdaptiveInstance = new Holder<Object>();
+    // Protocol$Adpative code 编译后的class
     private volatile Class<?> cachedAdaptiveClass = null;
     private String cachedDefaultName;
     private volatile Throwable createAdaptiveInstanceError;
@@ -589,7 +659,7 @@ public class ExtensionLoader<T> {
     }
 
     private void loadDirectory(Map<String, Class<?>> extensionClasses, String dir) {
-        String fileName = dir + type.getName();
+        String fileName = dir + type.getName();// META-INF/dubbo/internal/com.alibaba.dubbo.rpc.Protocol
         try {
             Enumeration<java.net.URL> urls;
             ClassLoader classLoader = findClassLoader();
@@ -600,7 +670,7 @@ public class ExtensionLoader<T> {
             }
             if (urls != null) {
                 while (urls.hasMoreElements()) {
-                    java.net.URL resourceURL = urls.nextElement();
+                    java.net.URL resourceURL = urls.nextElement(); // jar:file:/C:/Users/91ass/.m2/repository/com/alibaba/dubbo/2.5.3/dubbo-2.5.3.jar!/META-INF/dubbo/internal/com.alibaba.dubbo.rpc.Protocol
                     loadResource(extensionClasses, classLoader, resourceURL);
                 }
             }
@@ -615,7 +685,7 @@ public class ExtensionLoader<T> {
             BufferedReader reader = new BufferedReader(new InputStreamReader(resourceURL.openStream(), "utf-8"));
             try {
                 String line;
-                while ((line = reader.readLine()) != null) {
+                while ((line = reader.readLine()) != null) { // registry=com.alibaba.dubbo.registry.integration.RegistryProtocol
                     final int ci = line.indexOf('#');
                     if (ci >= 0) line = line.substring(0, ci);
                     line = line.trim();
@@ -624,8 +694,8 @@ public class ExtensionLoader<T> {
                             String name = null;
                             int i = line.indexOf('=');
                             if (i > 0) {
-                                name = line.substring(0, i).trim();
-                                line = line.substring(i + 1).trim();
+                                name = line.substring(0, i).trim(); // registry
+                                line = line.substring(i + 1).trim(); // com.alibaba.dubbo.registry.integration.RegistryProtocol
                             }
                             if (line.length() > 0) {
                                 loadClass(extensionClasses, resourceURL, Class.forName(line, true, classLoader), name);
@@ -735,6 +805,7 @@ public class ExtensionLoader<T> {
     }
 
     private Class<?> createAdaptiveExtensionClass() {
+        // eg: 获取Protocol$Adpative 的String 代码，组拼的代码， 这个类实现了  Protocol 接口
         String code = createAdaptiveExtensionClassCode();
         ClassLoader classLoader = findClassLoader();
         com.alibaba.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();

@@ -19,12 +19,20 @@ package com.alibaba.dubbo.rpc;
 import com.alibaba.dubbo.common.extension.SPI;
 
 /**
+ * 过滤器接口
  * Filter. (SPI, Singleton, ThreadSafe)
  */
 @SPI
 public interface Filter {
 
     /**
+     * 执行 Invoker 的过滤逻辑
+     * ps:
+     *      // 【自己实现】before filter
+     *              Result result = invoker.invoke(invocation);
+     *      // 【自己实现】after filter
+     *              return result;
+     *  ///////////////////////////////////以上为我加的//////////////////////////////////////
      * do invoke filter.
      * <p>
      * <code>

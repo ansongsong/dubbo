@@ -270,15 +270,15 @@ public class DubboProtocol extends AbstractProtocol {
     }
 
     private ExchangeServer createServer(URL url) {
-        // send readonly event when server closes, it's enabled by default
+        // send readonly event when server closes, it's enabled by default ：默认开启 Server 关闭时，发送 READ_ONLY 事件。
         url = url.addParameterIfAbsent(Constants.CHANNEL_READONLYEVENT_SENT_KEY, Boolean.TRUE.toString());
-        // enable heartbeat by default
+        // enable heartbeat by default 默认开启心跳功能。
         url = url.addParameterIfAbsent(Constants.HEARTBEAT_KEY, String.valueOf(Constants.DEFAULT_HEARTBEAT));
         String str = url.getParameter(Constants.SERVER_KEY, Constants.DEFAULT_REMOTING_SERVER);
-
+//        校验配置的 Server 的 Dubbo SPI 拓展是否存在。若不存在，抛出 RpcException 异常。
         if (str != null && str.length() > 0 && !ExtensionLoader.getExtensionLoader(Transporter.class).hasExtension(str))
             throw new RpcException("Unsupported server type: " + str + ", url: " + url);
-
+//      设置编解码器为 "Dubbo" 协议，即 DubboCountCodec 。
         url = url.addParameter(Constants.CODEC_KEY, DubboCodec.NAME);
         ExchangeServer server;
         try {

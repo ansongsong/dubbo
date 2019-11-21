@@ -131,25 +131,27 @@ public class RegistryProtocol implements Protocol {
 
     @Override
     public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
-        //export invoker
+        //export invoker// 暴露服务
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker);
-
+        // 获得注册中心 URL
         URL registryUrl = getRegistryUrl(originInvoker);
 
-        //registry provider
+        //registry provider // 获得注册中心对象
         final Registry registry = getRegistry(originInvoker);
+        // 获得服务提供者 URL
         final URL registeredProviderUrl = getRegisteredProviderUrl(originInvoker);
-
+        // 向本地注册表，注册服务提供者
         //to judge to delay publish whether or not
         boolean register = registeredProviderUrl.getParameter("register", true);
 
         ProviderConsumerRegTable.registerProvider(originInvoker, registryUrl, registeredProviderUrl);
-
+        // 向注册中心注册服务提供者（自己）
         if (register) {
             register(registryUrl, registeredProviderUrl);
             ProviderConsumerRegTable.getProviderWrapper(originInvoker).setReg(true);
         }
 
+        // 使用 OverrideListener 对象，订阅配置规则
         // Subscribe the override data
         // FIXME When the provider subscribes, it will affect the scene : a certain JVM exposes the service and call the same service. Because the subscribed is cached key with the name of the service, it causes the subscription information to cover.
         final URL overrideSubscribeUrl = getSubscribedOverrideUrl(registeredProviderUrl);

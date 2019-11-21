@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 扩展点接口的标识
  * Marker for extension interface
  * <p/>
  * Changes on extension configuration file <br/>
@@ -57,6 +58,7 @@ import java.lang.annotation.Target;
 public @interface SPI {
 
     /**
+     * 默认拓展实现类的名字。例如，Protocol 拓展接口
      * default extension name
      */
     String value() default "";
