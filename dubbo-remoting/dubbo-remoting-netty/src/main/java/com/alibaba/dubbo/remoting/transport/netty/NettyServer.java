@@ -90,7 +90,7 @@ public class NettyServer extends AbstractServer implements Server {
                 return pipeline;
             }
         });
-        // bind
+        // bind  getBindAddress() = 0.0.0.0:20880
         channel = bootstrap.bind(getBindAddress());
     }
 

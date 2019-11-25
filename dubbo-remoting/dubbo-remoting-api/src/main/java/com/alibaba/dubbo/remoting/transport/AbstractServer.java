@@ -49,15 +49,24 @@ public abstract class AbstractServer extends AbstractEndpoint implements Server 
 
     public AbstractServer(URL url, ChannelHandler handler) throws RemotingException {
         super(url, handler);
+        // 192.168.10.28:20880
         localAddress = getUrl().toInetSocketAddress();
-
+        // 192.168.10.28
+        // 1. getUrl().getParameter(Constants.BIND_IP_KEY, "") = ""
+        // 2. getUrl().getHost() = 192.168.10.28
         String bindIp = getUrl().getParameter(Constants.BIND_IP_KEY, getUrl().getHost());
         int bindPort = getUrl().getParameter(Constants.BIND_PORT_KEY, getUrl().getPort());
+        // dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&channel.readonly.sent=true&codec=dubbo&dubbo=2.5.3&heartbeat=60000&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,bulkUpdate,online,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=35340&revision=11.8&side=provider&timestamp=1574670816671
+        // anyhost=true
         if (url.getParameter(Constants.ANYHOST_KEY, false) || NetUtils.isInvalidLocalHost(bindIp)) {
+            // 0.0.0.0
             bindIp = NetUtils.ANYHOST;
         }
+        // 0.0.0.0:20880
         bindAddress = new InetSocketAddress(bindIp, bindPort);
+        //  用的  Constants.DEFAULT_ACCEPTS = 0
         this.accepts = url.getParameter(Constants.ACCEPTS_KEY, Constants.DEFAULT_ACCEPTS);
+        // 600000 用的  Constants.DEFAULT_IDLE_TIMEOUT
         this.idleTimeout = url.getParameter(Constants.IDLE_TIMEOUT_KEY, Constants.DEFAULT_IDLE_TIMEOUT);
         try {
             doOpen();
@@ -167,7 +176,7 @@ public abstract class AbstractServer extends AbstractEndpoint implements Server 
     public InetSocketAddress getLocalAddress() {
         return localAddress;
     }
-
+    // debug 得出 ：0.0.0.0:20880
     public InetSocketAddress getBindAddress() {
         return bindAddress;
     }
