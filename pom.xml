@@ -142,6 +142,7 @@
         <module>bom</module>
         <module>all</module>
         <module>distribution</module>
+        <module>an-demo</module>
     </modules>
 
     <dependencyManagement>

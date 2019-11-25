@@ -44,11 +44,20 @@ public abstract class AbstractProtocol implements Protocol {
     protected final Set<Invoker<?>> invokers = new ConcurrentHashSet<Invoker<?>>();
 
     protected static String serviceKey(URL url) {
+        //   // dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=72292&revision=11.8&side=provider&timestamp=1574503732432
         int port = url.getParameter(Constants.BIND_PORT_KEY, url.getPort());
         return serviceKey(port, url.getPath(), url.getParameter(Constants.VERSION_KEY),
                 url.getParameter(Constants.GROUP_KEY));
     }
 
+    /**
+     *
+     * @param port 20880
+     * @param serviceName  com.xianzhi.apis.search.ArticleServiceApi
+     * @param serviceVersion null
+     * @param serviceGroup null
+     * @return
+     */
     protected static String serviceKey(int port, String serviceName, String serviceVersion, String serviceGroup) {
         return ProtocolUtils.serviceKey(port, serviceName, serviceVersion, serviceGroup);
     }

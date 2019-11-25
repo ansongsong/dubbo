@@ -171,7 +171,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         if (registries != null && !registries.isEmpty()) {
             for (RegistryConfig config : registries) {
                 // 获得注册中心的地址
-                String address = config.getAddress();
+                String address = config.getAddress(); // zookeeper://127.0.0.1:2181
                 if (address == null || address.length() == 0) {
                     address = Constants.ANYHOST_VALUE;
                 }
@@ -184,11 +184,11 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                 if (address.length() > 0 && !RegistryConfig.NO_AVAILABLE.equalsIgnoreCase(address)) {
                     Map<String, String> map = new HashMap<String, String>();
                     // 将各种配置对象，添加到 `map` 集合中。
-                    appendParameters(map, application);
-                    appendParameters(map, config);
+                    appendParameters(map, application); //"application" -> "xianzhi-search"
+                    appendParameters(map, config); //"pid" -> "6340"  "timestamp" -> "1574420148949"
                     // 添加 `path` `dubbo` `timestamp` `pid` 到 `map` 集合中
-                    map.put("path", RegistryService.class.getName());
-                    map.put("dubbo", Version.getProtocolVersion());
+                    map.put("path", RegistryService.class.getName()); // "path" -> "com.alibaba.dubbo.registry.RegistryService"
+                    map.put("dubbo", Version.getProtocolVersion()); // "dubbo" -> "2.5.3"
                     map.put(Constants.TIMESTAMP_KEY, String.valueOf(System.currentTimeMillis()));
                     if (ConfigUtils.getPid() > 0) {
                         map.put(Constants.PID_KEY, String.valueOf(ConfigUtils.getPid()));
@@ -198,16 +198,16 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                         if (ExtensionLoader.getExtensionLoader(RegistryFactory.class).hasExtension("remote")) {
                             map.put("protocol", "remote");
                         } else {
-                            map.put("protocol", "dubbo");
+                            map.put("protocol", "dubbo");// "protocol" -> "dubbo"
                         }
                     }
                     // 解析地址，创建 Dubbo URL 数组。（数组大小可以为一）
-                    List<URL> urls = UrlUtils.parseURLs(address, map);
+                    List<URL> urls = UrlUtils.parseURLs(address, map);// zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&pid=6340&timestamp=1574420148949
                     // 循环 `url` ，设置 "registry" 和 "protocol" 属性。
                     for (URL url : urls) {
                         // 设置 `registry=${protocol}` 和 `protocol=registry` 到 URL
-                        url = url.addParameter(Constants.REGISTRY_KEY, url.getProtocol());
-                        url = url.setProtocol(Constants.REGISTRY_PROTOCOL);
+                        url = url.addParameter(Constants.REGISTRY_KEY, url.getProtocol()); zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&pid=6340&registry=zookeeper&timestamp=1574420148949
+                        url = url.setProtocol(Constants.REGISTRY_PROTOCOL); // registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&pid=6340&registry=zookeeper&timestamp=1574420148949
                         // 添加到结果
                         if ((provider && url.getParameter(Constants.REGISTER_KEY, true))// 服务提供者 && 注册
                                 || (!provider && url.getParameter(Constants.SUBSCRIBE_KEY, true))) { // 服务消费者 && 订阅

@@ -31,10 +31,10 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
  * DubboNamespaceHandler
- *
+ * Dubbo 的 XML Namespace 的处理器  继承 NamespaceHandlerSupport
  * @export
  */
-public class DubboNamespaceHandler extends NamespaceHandlerSupport {
+public class DubboNamespaceHandler extends  NamespaceHandlerSupport{
 
     static {
         Version.checkDuplicate(DubboNamespaceHandler.class);

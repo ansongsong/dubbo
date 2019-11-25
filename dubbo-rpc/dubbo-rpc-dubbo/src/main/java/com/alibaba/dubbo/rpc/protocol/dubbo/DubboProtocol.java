@@ -226,11 +226,13 @@ public class DubboProtocol extends AbstractProtocol {
 
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        // dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=72292&revision=11.8&side=provider&timestamp=1574503732432
         URL url = invoker.getUrl();
 
-        // export service.
+        // export service. debug发现 String key = com.xianzhi.apis.search.ArticleServiceApi:20880
         String key = serviceKey(url);
         DubboExporter<T> exporter = new DubboExporter<T>(invoker, key, exporterMap);
+        // "com.xianzhi.apis.search.ArticleServiceApi:20880" -> "com.alibaba.dubbo.registry.integration.RegistryProtocol$InvokerDelegete@12421766"
         exporterMap.put(key, exporter);
 
         //export an stub service for dispatching event
@@ -254,7 +256,7 @@ public class DubboProtocol extends AbstractProtocol {
     }
 
     private void openServer(URL url) {
-        // find server.
+        // find server. debug 得出 ： String key = 192.168.10.28:20880
         String key = url.getAddress();
         //client can export a service which's only for server to invoke
         boolean isServer = url.getParameter(Constants.IS_SERVER_KEY, true);
@@ -272,16 +274,18 @@ public class DubboProtocol extends AbstractProtocol {
     private ExchangeServer createServer(URL url) {
         // send readonly event when server closes, it's enabled by default ：默认开启 Server 关闭时，发送 READ_ONLY 事件。
         url = url.addParameterIfAbsent(Constants.CHANNEL_READONLYEVENT_SENT_KEY, Boolean.TRUE.toString());
-        // enable heartbeat by default 默认开启心跳功能。
+        // enable heartbeat by default 默认开启心跳功能。 dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&channel.readonly.sent=true&dubbo=2.5.3&heartbeat=60000&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=70228&revision=11.8&side=provider&timestamp=1574503858318
         url = url.addParameterIfAbsent(Constants.HEARTBEAT_KEY, String.valueOf(Constants.DEFAULT_HEARTBEAT));
+        // debug 得出 String str = netty
         String str = url.getParameter(Constants.SERVER_KEY, Constants.DEFAULT_REMOTING_SERVER);
 //        校验配置的 Server 的 Dubbo SPI 拓展是否存在。若不存在，抛出 RpcException 异常。
         if (str != null && str.length() > 0 && !ExtensionLoader.getExtensionLoader(Transporter.class).hasExtension(str))
             throw new RpcException("Unsupported server type: " + str + ", url: " + url);
-//      设置编解码器为 "Dubbo" 协议，即 DubboCountCodec 。
+//      设置编解码器为 "Dubbo" 协议，即 DubboCountCodec 。dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&channel.readonly.sent=true&codec=dubbo&dubbo=2.5.3&heartbeat=60000&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=70228&revision=11.8&side=provider&timestamp=1574503858318
         url = url.addParameter(Constants.CODEC_KEY, DubboCodec.NAME);
         ExchangeServer server;
         try {
+            // url  dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&channel.readonly.sent=true&codec=dubbo&dubbo=2.5.3&heartbeat=60000&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,bulkUpdate,online,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=52152&revision=11.8&side=provider&timestamp=1574481386459
             server = Exchangers.bind(url, requestHandler);
         } catch (RemotingException e) {
             throw new RpcException("Fail to start server(url: " + url + ") " + e.getMessage(), e);

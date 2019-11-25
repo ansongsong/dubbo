@@ -29,6 +29,14 @@ public class ProtocolUtils {
                 url.getParameter(Constants.GROUP_KEY));
     }
 
+    /**
+     *
+     * @param port 20880
+     * @param serviceName  com.xianzhi.apis.search.ArticleServiceApi
+     * @param serviceVersion null
+     * @param serviceGroup null
+     * @return com.xianzhi.apis.search.ArticleServiceApi:20880
+     */
     public static String serviceKey(int port, String serviceName, String serviceVersion, String serviceGroup) {
         StringBuilder buf = new StringBuilder();
         if (serviceGroup != null && serviceGroup.length() > 0) {
