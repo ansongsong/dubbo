@@ -71,6 +71,7 @@ public abstract class AbstractRegistry implements Registry {
     private final Set<URL> registered = new ConcurrentHashSet<URL>();
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<URL, Set<NotifyListener>>();
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<URL, Map<String, List<URL>>>();
+    // zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&interface=com.alibaba.dubbo.registry.RegistryService&pid=67648&timestamp=1574751703663
     private URL registryUrl;
     // Local disk cache file
     private File file;

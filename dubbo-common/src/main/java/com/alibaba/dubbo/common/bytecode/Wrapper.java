@@ -92,10 +92,11 @@ public abstract class Wrapper {
     /**
      * get wrapper.
      *
-     * @param c Class instance.
+     * @param c Class instance. class com.xianzhi.search.provider.ArticleServiceApiImpl
      * @return Wrapper instance(not null).
      */
     public static Wrapper getWrapper(Class<?> c) {
+        // 判定此 Class 对象所表示的类或接口与指定的 Class 参数所表示的类或接口是否相同，或是否是其超类或超接口。如果是则返回 true；否则返回 false。
         while (ClassGenerator.isDynamicClass(c)) // can not wrapper on dynamic class.
             c = c.getSuperclass();
 
@@ -104,12 +105,19 @@ public abstract class Wrapper {
 
         Wrapper ret = WRAPPER_MAP.get(c);
         if (ret == null) {
+            // 重点，生成包装类
             ret = makeWrapper(c);
             WRAPPER_MAP.put(c, ret);
         }
         return ret;
     }
 
+    /**
+     * 生成包装类 在{@link Wrapper#getWrapper(Class)}中使用
+     * 具体生成的包装类 代码 见 an-demo com.xiaoan.service wrapper1.java 中
+     * @param c
+     * @return
+     */
     private static Wrapper makeWrapper(Class<?> c) {
         if (c.isPrimitive())
             throw new IllegalArgumentException("Can not create wrapper for primitive type: " + c);

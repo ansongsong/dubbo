@@ -108,9 +108,14 @@ public class ZookeeperRegistry extends FailbackRegistry {
         }
     }
 
+    /**
+     *
+     * @param url  dubbo://192.168.10.28:20880/com.xianzhi.apis.illegalword.IIllegalWordServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.illegalword.IIllegalWordServiceApi&methods=batchCreateWords,matchIllegalWords,createWord,deleteWord,findWords&pid=67648&revision=11.8&side=provider&timestamp=1574765158919
+     */
     @Override
     protected void doRegister(URL url) {
         try {
+            // /dubbo/com.xianzhi.apis.illegalword.IIllegalWordServiceApi/providers/dubbo%3A%2F%2F192.168.10.28%3A20880%2Fcom.xianzhi.apis.illegalword.IIllegalWordServiceApi%3Fanyhost%3Dtrue%26application%3Dxianzhi-search%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.illegalword.IIllegalWordServiceApi%26methods%3DbatchCreateWords%2CmatchIllegalWords%2CcreateWord%2CdeleteWord%2CfindWords%26pid%3D67648%26revision%3D11.8%26side%3Dprovider%26timestamp%3D1574765158919
             zkClient.create(toUrlPath(url), url.getParameter(Constants.DYNAMIC_KEY, true));
         } catch (Throwable e) {
             throw new RpcException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);

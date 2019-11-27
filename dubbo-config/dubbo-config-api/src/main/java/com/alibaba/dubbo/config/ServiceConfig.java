@@ -540,9 +540,11 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                     logger.info("Export dubbo service " + interfaceClass.getName() + " to url " + url);
                 }
                 if (registryURLs != null && !registryURLs.isEmpty()) {
+                    // registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&pid=67648&registry=zookeeper&timestamp=1574751703663
                     for (URL registryURL : registryURLs) {
                         // "dynamic" ：服务是否动态注册，如果设为false，注册后将显示后disable状态，需人工启用，并且服务提供者停止时，也不会自动取消册，需人工禁用。
                         url = url.addParameterIfAbsent(Constants.DYNAMIC_KEY, registryURL.getParameter(Constants.DYNAMIC_KEY));
+                        // 获得监控中心 URL
                         URL monitorUrl = loadMonitor(registryURL);
                         if (monitorUrl != null) {
                             url = url.addParameterAndEncoded(Constants.MONITOR_KEY, monitorUrl.toFullString());
@@ -556,18 +558,30 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         if (StringUtils.isNotEmpty(proxy)) {
                             registryURL = registryURL.addParameter(Constants.PROXY_KEY, proxy);
                         }
-
+                        // 使用 ProxyFactory 创建 Invoker 对象
+                        // registryURL = registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&pid=67648&registry=zookeeper&timestamp=1574751703663
+                        // url = dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=67648&revision=11.8&side=provider&timestamp=1574751703678
+                        // proxyFactory = StubProxyFactoryWrapper
                         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
-
+//                        wrapperInvoker.getUrl() = registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&export=dubbo%3A%2F%2F192.168.10.28%3A20880%2Fcom.xianzhi.apis.search.ArticleServiceApi%3Fanyhost%3Dtrue%26application%3Dxianzhi-search%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.search.ArticleServiceApi%26methods%3Doffline%2CgetTitleByWordPage%2Csave%2Cupdate%2Conline%2CbulkUpdate%2CgetArticlesAndPage%2CupdateFileds%2Cdelete%2CfindByQueryParams%26pid%3D67648%26revision%3D11.8%26side%3Dprovider%26timestamp%3D1574751703678&pid=67648&registry=zookeeper&timestamp=1574751703663
+//                        protocol = RegistryProtocol
+                        // 使用 Protocol 暴露 Invoker 对象
                         Exporter<?> exporter = protocol.export(wrapperInvoker);
+                        // 添加到 `exporters`
                         exporters.add(exporter);
                     }
                 } else {
+//                    参见 《Dubbo 用户指南 —— 直连提供者》 文档。 http://dubbo.apache.org/zh-cn/docs/user/demos/explicit-target.html
+//                    当配置注册中心为 "N/A" 时，表示即使远程暴露服务，也不向注册中心注册。这种方式用于被服务消费者直连服务提供者
+                    // 用于被服务消费者直连服务提供者，参见文档 http://dubbo.apache.org/zh-cn/docs/user/demos/explicit-target.html 。主要用于开发测试环境使用。
+                    // 使用 ProxyFactory 创建 Invoker 对象
                     Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, url);
+                    // 创建 DelegateProviderMetaDataInvoker 对象
                     DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
-
+                    // 使用 Protocol 暴露 Invoker 对象
                     Exporter<?> exporter = protocol.export(wrapperInvoker);
+                    // 添加到 `exporters`
                     exporters.add(exporter);
                 }
             }
@@ -826,7 +840,10 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
     public T getRef() {
         return ref;
     }
-
+    /*
+     * 在 {@link demo 中 ServiceProviderApi#main()} 中set
+     * @param ref
+     */
     public void setRef(T ref) {
         this.ref = ref;
     }

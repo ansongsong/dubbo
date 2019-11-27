@@ -82,11 +82,13 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
 
     @Override
     public Registry getRegistry(URL url) {
+        // zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&interface=com.alibaba.dubbo.registry.RegistryService&pid=67648&timestamp=1574765158917
         url = url.setPath(RegistryService.class.getName())
                 .addParameter(Constants.INTERFACE_KEY, RegistryService.class.getName())
                 .removeParameters(Constants.EXPORT_KEY, Constants.REFER_KEY);
+        // key = zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService
         String key = url.toServiceStringWithoutResolving();
-        // Lock the registry access process to ensure a single instance of the registry
+        // Lock the registry access process to ensure a single instance of the registry  // 锁定注册中心获取过程，保证注册中心单一实例
         LOCK.lock();
         try {
             Registry registry = REGISTRIES.get(key);

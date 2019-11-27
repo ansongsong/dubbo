@@ -64,8 +64,11 @@ public class RegistryProtocol implements Protocol {
     private final static Logger logger = LoggerFactory.getLogger(RegistryProtocol.class);
     private static RegistryProtocol INSTANCE;
     private final Map<URL, NotifyListener> overrideListeners = new ConcurrentHashMap<URL, NotifyListener>();
-    //To solve the problem of RMI repeated exposure port conflicts, the services that have been exposed are no longer exposed.
-    //providerurl <--> exporter
+    /**To solve the problem of RMI repeated exposure port conflicts, the services that have been exposed are no longer exposed. 用于解决rmi重复暴露端口冲突的问题，已经暴露过的服务不再重新暴露
+     * providerurl <--> exporter
+     * key =dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=67648&revision=11.8&side=provider&timestamp=1574751703678
+     * value = {@link RegistryProtocol#doLocalExport}
+     */
     private final Map<String, ExporterChangeableWrapper<?>> bounds = new ConcurrentHashMap<String, ExporterChangeableWrapper<?>>();
     private Cluster cluster;
     private Protocol protocol;
@@ -133,12 +136,12 @@ public class RegistryProtocol implements Protocol {
     public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
         //export invoker// 暴露服务
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker);
-        // 获得注册中心 URL
+        // 获得注册中心 URL   registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&export=dubbo%3A%2F%2F192.168.10.28%3A20880%2Fcom.xianzhi.apis.illegalword.IIllegalWordServiceApi%3Fanyhost%3Dtrue%26application%3Dxianzhi-search%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.illegalword.IIllegalWordServiceApi%26methods%3DbatchCreateWords%2CmatchIllegalWords%2CcreateWord%2CdeleteWord%2CfindWords%26pid%3D67648%26revision%3D11.8%26side%3Dprovider%26timestamp%3D1574765158919&pid=67648&registry=zookeeper&timestamp=1574765158917
         URL registryUrl = getRegistryUrl(originInvoker);
 
         //registry provider // 获得注册中心对象
         final Registry registry = getRegistry(originInvoker);
-        // 获得服务提供者 URL
+        // 获得服务提供者 URL dubbo://192.168.10.28:20880/com.xianzhi.apis.illegalword.IIllegalWordServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.illegalword.IIllegalWordServiceApi&methods=batchCreateWords,matchIllegalWords,createWord,deleteWord,findWords&pid=67648&revision=11.8&side=provider&timestamp=1574765158919
         final URL registeredProviderUrl = getRegisteredProviderUrl(originInvoker);
         // 向本地注册表，注册服务提供者
         //to judge to delay publish whether or not
@@ -164,6 +167,7 @@ public class RegistryProtocol implements Protocol {
 
     @SuppressWarnings("unchecked")
     private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker) {
+        //dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=67648&revision=11.8&side=provider&timestamp=1574751703678
         String key = getCacheKey(originInvoker);
         ExporterChangeableWrapper<T> exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
         if (exporter == null) {
@@ -204,7 +208,9 @@ public class RegistryProtocol implements Protocol {
      * @return
      */
     private Registry getRegistry(final Invoker<?> originInvoker) {
+        //zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&export=dubbo%3A%2F%2F192.168.10.28%3A20880%2Fcom.xianzhi.apis.illegalword.IIllegalWordServiceApi%3Fanyhost%3Dtrue%26application%3Dxianzhi-search%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.illegalword.IIllegalWordServiceApi%26methods%3DbatchCreateWords%2CmatchIllegalWords%2CcreateWord%2CdeleteWord%2CfindWords%26pid%3D67648%26revision%3D11.8%26side%3Dprovider%26timestamp%3D1574765158919&pid=67648&timestamp=1574765158917
         URL registryUrl = getRegistryUrl(originInvoker);
+        //此方法 有很多操作，需要重点看 zkClient 就在这里面
         return registryFactory.getRegistry(registryUrl);
     }
 
@@ -222,7 +228,7 @@ public class RegistryProtocol implements Protocol {
      * Return the url that is registered to the registry and filter the url parameter once
      *
      * @param originInvoker
-     * @return
+     * @return dubbo://192.168.10.28:20880/com.xianzhi.apis.illegalword.IIllegalWordServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.illegalword.IIllegalWordServiceApi&methods=batchCreateWords,matchIllegalWords,createWord,deleteWord,findWords&pid=67648&revision=11.8&side=provider&timestamp=1574765158919
      */
     private URL getRegisteredProviderUrl(final Invoker<?> originInvoker) {
         URL providerUrl = getProviderUrl(originInvoker);
@@ -250,11 +256,12 @@ public class RegistryProtocol implements Protocol {
      * @return
      */
     private URL getProviderUrl(final Invoker<?> origininvoker) {
+        // export = dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=67648&revision=11.8&side=provider&timestamp=1574751703678
         String export = origininvoker.getUrl().getParameterAndDecoded(Constants.EXPORT_KEY);
         if (export == null || export.length() == 0) {
             throw new IllegalArgumentException("The registry export url is null! registry: " + origininvoker.getUrl());
         }
-
+        // providerUrl = dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=67648&revision=11.8&side=provider&timestamp=1574751703678
         URL providerUrl = URL.valueOf(export);
         return providerUrl;
     }
@@ -268,6 +275,7 @@ public class RegistryProtocol implements Protocol {
     private String getCacheKey(final Invoker<?> originInvoker) {
         URL providerUrl = getProviderUrl(originInvoker);
         String key = providerUrl.removeParameters("dynamic", "enabled").toFullString();
+//        key = dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=67648&revision=11.8&side=provider&timestamp=1574751703678
         return key;
     }
 

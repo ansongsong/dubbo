@@ -35,6 +35,7 @@ public class ZookeeperRegistryFactory extends AbstractRegistryFactory {
 
     @Override
     public Registry createRegistry(URL url) {
+        // url = zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&interface=com.alibaba.dubbo.registry.RegistryService&pid=67648&timestamp=1574751703663
         return new ZookeeperRegistry(url, zookeeperTransporter);
     }
 

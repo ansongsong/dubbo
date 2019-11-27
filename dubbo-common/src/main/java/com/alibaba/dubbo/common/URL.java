@@ -187,7 +187,7 @@ public final class URL implements Serializable {
         int port = 0;
         String path = null;
         Map<String, String> parameters = null;
-        int i = url.indexOf("?"); // seperator between body and parameters 
+        int i = url.indexOf("?"); // seperator between body and parameters
         if (i >= 0) {
             String[] parts = url.substring(i + 1).split("\\&");
             parameters = new HashMap<String, String>();
@@ -872,6 +872,9 @@ public final class URL implements Serializable {
         if (value == null || value.length() == 0) {
             return this;
         }
+        // key = export
+        // value = dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=67648&revision=11.8&side=provider&timestamp=1574751703678
+        // encode(value)=dubbo%3A%2F%2F192.168.10.28%3A20880%2Fcom.xianzhi.apis.search.ArticleServiceApi%3Fanyhost%3Dtrue%26application%3Dxianzhi-search%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.search.ArticleServiceApi%26methods%3Doffline%2CgetTitleByWordPage%2Csave%2Cupdate%2Conline%2CbulkUpdate%2CgetArticlesAndPage%2CupdateFileds%2Cdelete%2CfindByQueryParams%26pid%3D67648%26revision%3D11.8%26side%3Dprovider%26timestamp%3D1574751703678
         return addParameter(key, encode(value));
     }
 
