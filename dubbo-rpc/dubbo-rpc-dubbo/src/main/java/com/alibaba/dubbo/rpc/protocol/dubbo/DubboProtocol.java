@@ -283,6 +283,7 @@ public class DubboProtocol extends AbstractProtocol {
             throw new RpcException("Unsupported server type: " + str + ", url: " + url);
 //      设置编解码器为 "Dubbo" 协议，即 DubboCountCodec 。dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&channel.readonly.sent=true&codec=dubbo&dubbo=2.5.3&heartbeat=60000&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=70228&revision=11.8&side=provider&timestamp=1574503858318
         url = url.addParameter(Constants.CODEC_KEY, DubboCodec.NAME);
+        // 启动服务器
         ExchangeServer server;
         try {
             // url  dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&channel.readonly.sent=true&codec=dubbo&dubbo=2.5.3&heartbeat=60000&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,bulkUpdate,online,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=52152&revision=11.8&side=provider&timestamp=1574481386459

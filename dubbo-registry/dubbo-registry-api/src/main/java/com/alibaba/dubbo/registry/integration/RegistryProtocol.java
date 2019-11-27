@@ -472,12 +472,17 @@ public class RegistryProtocol implements Protocol {
 
     /**
      * exporter proxy, establish the corresponding relationship between the returned exporter and the exporter exported by the protocol, and can modify the relationship at the time of override.
-     *
+     *实现 Exporter 接口，Exporter 可变的包装器。
      * @param <T>
      */
     private class ExporterChangeableWrapper<T> implements Exporter<T> {
-
+        /**
+         * 原 Invoker 对象
+         */
         private final Invoker<T> originInvoker;
+        /**
+         * 暴露的 Exporter 对象
+         */
         private Exporter<T> exporter;
 
         public ExporterChangeableWrapper(Exporter<T> exporter, Invoker<T> originInvoker) {
@@ -506,6 +511,10 @@ public class RegistryProtocol implements Protocol {
         }
     }
 
+    /**
+     * 实现 Exporter 接口，可销毁的 Exporter 实现类。
+     * @param <T>
+     */
     static private class DestroyableExporter<T> implements Exporter<T> {
 
         public static final ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("Exporter-Unexport", true));
