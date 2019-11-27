@@ -57,11 +57,12 @@ import static com.alibaba.dubbo.common.Constants.CHECK_KEY;
 
 /**
  * RegistryProtocol
- *
+ *实现 Protocol 接口，注册中心协议实现类。
  */
 public class RegistryProtocol implements Protocol {
 
     private final static Logger logger = LoggerFactory.getLogger(RegistryProtocol.class);
+//    单例。在 Dubbo SPI 中，被初始化，有且仅有一次。
     private static RegistryProtocol INSTANCE;
     private final Map<URL, NotifyListener> overrideListeners = new ConcurrentHashMap<URL, NotifyListener>();
     /**To solve the problem of RMI repeated exposure port conflicts, the services that have been exposed are no longer exposed. 用于解决rmi重复暴露端口冲突的问题，已经暴露过的服务不再重新暴露
@@ -71,7 +72,14 @@ public class RegistryProtocol implements Protocol {
      */
     private final Map<String, ExporterChangeableWrapper<?>> bounds = new ConcurrentHashMap<String, ExporterChangeableWrapper<?>>();
     private Cluster cluster;
+    /**
+     * Protocol 自适应拓展实现类，通过 Dubbo SPI 自动注入。
+     */
     private Protocol protocol;
+    /**
+     * RegistryFactory 自适应拓展实现类，通过 Dubbo SPI 自动注入。
+     * 用于创建注册中心 Registry 对象。
+     */
     private RegistryFactory registryFactory;
     private ProxyFactory proxyFactory;
 
@@ -143,14 +151,16 @@ public class RegistryProtocol implements Protocol {
         final Registry registry = getRegistry(originInvoker);
         // 获得服务提供者 URL dubbo://192.168.10.28:20880/com.xianzhi.apis.illegalword.IIllegalWordServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.illegalword.IIllegalWordServiceApi&methods=batchCreateWords,matchIllegalWords,createWord,deleteWord,findWords&pid=67648&revision=11.8&side=provider&timestamp=1574765158919
         final URL registeredProviderUrl = getRegisteredProviderUrl(originInvoker);
-        // 向本地注册表，注册服务提供者
+
         //to judge to delay publish whether or not
         boolean register = registeredProviderUrl.getParameter("register", true);
-
+        // 向本地注册表，注册服务提供者
         ProviderConsumerRegTable.registerProvider(originInvoker, registryUrl, registeredProviderUrl);
         // 向注册中心注册服务提供者（自己）
         if (register) {
+//            向注册中心注册服务提供者（自己）
             register(registryUrl, registeredProviderUrl);
+            // 标记向本地注册表的注册服务提供者，已经注册
             ProviderConsumerRegTable.getProviderWrapper(originInvoker).setReg(true);
         }
 
@@ -165,6 +175,15 @@ public class RegistryProtocol implements Protocol {
         return new DestroyableExporter<T>(exporter, originInvoker, overrideSubscribeUrl, registeredProviderUrl);
     }
 
+    /**
+     * 暴露服务。
+     *
+     * 此处的 Local 指的是，本地启动服务，但是不包括向注册中心注册服务的意思。
+     *
+     * @param originInvoker 原始 Invoker
+     * @param <T> 泛型
+     * @return Exporter 对象
+     */
     @SuppressWarnings("unchecked")
     private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker) {
         //dubbo://192.168.10.28:20880/com.xianzhi.apis.search.ArticleServiceApi?anyhost=true&application=xianzhi-search&dubbo=2.5.3&interface=com.xianzhi.apis.search.ArticleServiceApi&methods=offline,getTitleByWordPage,save,update,online,bulkUpdate,getArticlesAndPage,updateFileds,delete,findByQueryParams&pid=67648&revision=11.8&side=provider&timestamp=1574751703678
@@ -214,6 +233,11 @@ public class RegistryProtocol implements Protocol {
         return registryFactory.getRegistry(registryUrl);
     }
 
+    /**
+     * 获得注册中心 URL
+     * @param originInvoker
+     * @return
+     */
     private URL getRegistryUrl(Invoker<?> originInvoker) {
         URL registryUrl = originInvoker.getUrl();
         if (Constants.REGISTRY_PROTOCOL.equals(registryUrl.getProtocol())) {
@@ -269,8 +293,10 @@ public class RegistryProtocol implements Protocol {
     /**
      * Get the key cached in bounds by invoker
      *
-     * @param originInvoker
-     * @return
+     * 获 取invoker 在 bounds中 缓存的key
+     *
+     * @param originInvoker 原始 Invoker
+     * @return url 字符串
      */
     private String getCacheKey(final Invoker<?> originInvoker) {
         URL providerUrl = getProviderUrl(originInvoker);

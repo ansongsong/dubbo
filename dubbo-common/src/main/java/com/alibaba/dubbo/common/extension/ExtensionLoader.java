@@ -44,6 +44,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
 /**
+ * 一个接口 一个 ExtensionLoader 跟实现类有多少没关系
  * 拓展加载器。这是 Dubbo SPI 的核心。
  * Load dubbo extensions
  * <ul>
@@ -671,6 +672,7 @@ public class ExtensionLoader<T> {
             if (urls != null) {
                 while (urls.hasMoreElements()) {
                     java.net.URL resourceURL = urls.nextElement(); // jar:file:/C:/Users/91ass/.m2/repository/com/alibaba/dubbo/2.5.3/dubbo-2.5.3.jar!/META-INF/dubbo/internal/com.alibaba.dubbo.rpc.Protocol
+                    // 重点
                     loadResource(extensionClasses, classLoader, resourceURL);
                 }
             }
@@ -698,6 +700,7 @@ public class ExtensionLoader<T> {
                                 line = line.substring(i + 1).trim(); // com.alibaba.dubbo.registry.integration.RegistryProtocol
                             }
                             if (line.length() > 0) {
+                                // 重点
                                 loadClass(extensionClasses, resourceURL, Class.forName(line, true, classLoader), name);
                             }
                         } catch (Throwable t) {

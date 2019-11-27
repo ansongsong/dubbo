@@ -219,7 +219,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         }
         return registryList;
     }
-
+    // 精尽 Dubbo 源码分析 —— 服务暴露（二）之远程暴露（Dubbo） 中
     protected URL loadMonitor(URL registryURL) {
         if (monitor == null) {
             String monitorAddress = ConfigUtils.getProperty("dubbo.monitor.address");
