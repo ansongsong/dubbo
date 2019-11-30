@@ -124,10 +124,23 @@ public class UrlUtils {
         return u;
     }
 
+    /**
+     * defaults
+     * 0 = {HashMap$Node@19055} "path" -> "com.alibaba.dubbo.registry.RegistryService"
+     * 1 = {HashMap$Node@21655} "protocol" -> "dubbo"
+     * 2 = {HashMap$Node@18483} "application" -> "xianzhi_admin_consumer"
+     * 3 = {HashMap$Node@19056} "dubbo" -> "2.5.3"
+     * 4 = {HashMap$Node@19057} "pid" -> "25436"
+     * 5 = {HashMap$Node@19058} "timestamp" -> "1574858899432"
+     * @param address  zookeeper://192.168.0.197:2181
+     * @param defaults
+     * @return zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&timestamp=1574858899432
+     */
     public static List<URL> parseURLs(String address, Map<String, String> defaults) {
         if (address == null || address.length() == 0) {
             return null;
         }
+        // zookeeper://192.168.0.197:2181
         String[] addresses = Constants.REGISTRY_SPLIT_PATTERN.split(address);
         if (addresses == null || addresses.length == 0) {
             return null; //here won't be empty
@@ -136,6 +149,7 @@ public class UrlUtils {
         for (String addr : addresses) {
             registries.add(parseURL(addr, defaults));
         }
+        // zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&timestamp=1574858899432
         return registries;
     }
 

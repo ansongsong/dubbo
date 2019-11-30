@@ -89,7 +89,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     // module info
     protected ModuleConfig module;
 
-    // registry centers
+    // registry centers <dubbo:registry address="zookeeper://192.168.0.197:2181" id="xiamenBankDepositServer" />
     protected List<RegistryConfig> registries;
 
     // connection events
@@ -104,6 +104,9 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     // the scope for referring/exporting a service, if it's local, it means searching in current JVM only.
     private String scope;
 
+    /**
+     * <dubbo:registry address="zookeeper://192.168.0.197:2181" id="xiamenBankDepositServer" />
+     */
     protected void checkRegistry() {
         // for backward compatibility
         if (registries == null || registries.isEmpty()) {
@@ -168,13 +171,16 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         checkRegistry();
         // 创建 注册中心 URL 数组
         List<URL> registryList = new ArrayList<URL>();
+        // <dubbo:registry address="zookeeper://192.168.0.197:2181" id="xiamenBankDepositServer" />
         if (registries != null && !registries.isEmpty()) {
+            // zookeeper://192.168.0.197:2181
             for (RegistryConfig config : registries) {
                 // 获得注册中心的地址
                 String address = config.getAddress(); // zookeeper://127.0.0.1:2181
                 if (address == null || address.length() == 0) {
                     address = Constants.ANYHOST_VALUE;
                 }
+                // null
                 String sysaddress = System.getProperty("dubbo.registry.address");
                 // 从启动参数读取
                 if (sysaddress != null && sysaddress.length() > 0) {
@@ -195,22 +201,26 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     }
                     // 若不存在 `protocol` 参数，默认 "dubbo" 添加到 `map` 集合中
                     if (!map.containsKey("protocol")) {
-                        if (ExtensionLoader.getExtensionLoader(RegistryFactory.class).hasExtension("remote")) {
+                        if (ExtensionLoader.getExtensionLoader(RegistryFactory.class).hasExtension("remote")) { // false
                             map.put("protocol", "remote");
                         } else {
                             map.put("protocol", "dubbo");// "protocol" -> "dubbo"
                         }
                     }
                     // 解析地址，创建 Dubbo URL 数组。（数组大小可以为一）
-                    List<URL> urls = UrlUtils.parseURLs(address, map);// zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&pid=6340&timestamp=1574420148949
+                    List<URL> urls = UrlUtils.parseURLs(address, map);// 提供者 zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&pid=6340&timestamp=1574420148949
                     // 循环 `url` ，设置 "registry" 和 "protocol" 属性。
+                    //消费者 zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&timestamp=1574858899432
                     for (URL url : urls) {
                         // 设置 `registry=${protocol}` 和 `protocol=registry` 到 URL
-                        url = url.addParameter(Constants.REGISTRY_KEY, url.getProtocol()); zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&pid=6340&registry=zookeeper&timestamp=1574420148949
-                        url = url.setProtocol(Constants.REGISTRY_PROTOCOL); // registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&pid=6340&registry=zookeeper&timestamp=1574420148949
+//                      消费者  zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&registry=zookeeper&timestamp=1574858899432
+                        url = url.addParameter(Constants.REGISTRY_KEY, url.getProtocol()); // 提供者 zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&pid=6340&registry=zookeeper&timestamp=1574420148949
+//                        消费者  registry://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&registry=zookeeper&timestamp=1574858899432
+                        url = url.setProtocol(Constants.REGISTRY_PROTOCOL); // 提供者 registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&pid=6340&registry=zookeeper&timestamp=1574420148949
                         // 添加到结果
                         if ((provider && url.getParameter(Constants.REGISTER_KEY, true))// 服务提供者 && 注册
                                 || (!provider && url.getParameter(Constants.SUBSCRIBE_KEY, true))) { // 服务消费者 && 订阅
+//                            registry://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&registry=zookeeper&timestamp=1574858899432
                             registryList.add(url);
                         }
                     }

@@ -187,8 +187,14 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         }
     }
 
+    /**
+     *
+     * @param url  consumer://192.168.10.28/com.xianzhi.apis.xiamendeposit.XiamenDepositApi?application=xianzhi_admin_consumer&category=providers,configurators,routers&check=false&dubbo=2.5.3&interface=com.xianzhi.apis.xiamendeposit.XiamenDepositApi&methods=queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction&pid=25436&revision=14.13&side=consumer&timestamp=1574857342488
+     * @param listener
+     */
     @Override
     public void subscribe(URL url, NotifyListener listener) {
+
         super.subscribe(url, listener);
         removeFailedSubscribed(url, listener);
         try {

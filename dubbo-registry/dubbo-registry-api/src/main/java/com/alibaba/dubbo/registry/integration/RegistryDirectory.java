@@ -66,16 +66,40 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
     private static final RouterFactory routerFactory = ExtensionLoader.getExtensionLoader(RouterFactory.class).getAdaptiveExtension();
 
     private static final ConfiguratorFactory configuratorFactory = ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class).getAdaptiveExtension();
+//    com.alibaba.dubbo.registry.RegistryService
     private final String serviceKey; // Initialization at construction time, assertion not null
+//    interface com.xianzhi.apis.xiamendeposit.XiamenDepositApi
     private final Class<T> serviceType; // Initialization at construction time, assertion not null
+    /**
+     * 0 = {HashMap$Node@26711} "side" -> "consumer"
+     * 1 = {HashMap$Node@26712} "application" -> "xianzhi_admin_consumer"
+     * 2 = {HashMap$Node@26713} "methods" -> "queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction"
+     * 3 = {HashMap$Node@26714} "dubbo" -> "2.5.3"
+     * 4 = {HashMap$Node@26715} "monitor" -> "dubbo%3A%2F%2F192.168.0.197%3A2181%2Fcom.alibaba.dubbo.registry.RegistryService%3Fapplication%3Dxianzhi_admin_consumer%26dubbo%3D2.5.3%26pid%3D25436%26protocol%3Dregistry%26refer%3Ddubbo%253D2.5.3%2526interface%253Dcom.alibaba.dubbo.monitor.MonitorService%2526pid%253D25436%2526timestamp%253D1574857342514%26registry%3Dzookeeper%26timestamp%3D1574857342514"
+     * 5 = {HashMap$Node@26716} "pid" -> "25436"
+     * 6 = {HashMap$Node@26717} "check" -> "false"
+     * 7 = {HashMap$Node@26718} "interface" -> "com.xianzhi.apis.xiamendeposit.XiamenDepositApi"
+     * 8 = {HashMap$Node@26719} "revision" -> "14.13"
+     * 9 = {HashMap$Node@26720} "timestamp" -> "1574857342488"
+     */
     private final Map<String, String> queryMap; // Initialization at construction time, assertion not null
     private final URL directoryUrl; // Initialization at construction time, assertion not null, and always assign non null value
+    /**
+     * 0 = "queryTransaction"
+     * 1 = "fundTransferredOut"
+     * 2 = "cgtQueryTransBatch"
+     * 3 = "queryDepositProductInfor"
+     * 4 = "queryDepositUserInfor"
+     * 5 = "modifyCgtProductStatus"
+     * 6 = "queryPlatformInfor"
+     * 7 = "syncTransaction"
+     */
     private final String[] serviceMethods;
     private final boolean multiGroup;
     private Protocol protocol; // Initialization at the time of injection, the assertion is not null
     private Registry registry; // Initialization at the time of injection, the assertion is not null
     private volatile boolean forbidden = false;
-
+//  zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&check=false&dubbo=2.5.3&interface=com.xianzhi.apis.xiamendeposit.XiamenDepositApi&methods=queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction&pid=25436&revision=14.13&side=consumer&timestamp=1574857342488
     private volatile URL overrideDirectoryUrl; // Initialization at construction time, assertion not null, and always assign non null value
 
     private volatile URL registeredConsumerUrl;
@@ -99,6 +123,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
 
     public RegistryDirectory(Class<T> serviceType, URL url) {
         super(url);
+        // interface com.xianzhi.apis.xiamendeposit.XiamenDepositApi
         if (serviceType == null)
             throw new IllegalArgumentException("service type is null.");
         if (url.getServiceKey() == null || url.getServiceKey().length() == 0)
@@ -107,8 +132,11 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
         this.serviceKey = url.getServiceKey();
         this.queryMap = StringUtils.parseQueryString(url.getParameterAndDecoded(Constants.REFER_KEY));
         this.overrideDirectoryUrl = this.directoryUrl = url.setPath(url.getServiceInterface()).clearParameters().addParameters(queryMap).removeParameter(Constants.MONITOR_KEY);
+        // group = ""
         String group = directoryUrl.getParameter(Constants.GROUP_KEY, "");
+        // multiGroup = false
         this.multiGroup = group != null && ("*".equals(group) || group.contains(","));
+//        queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction
         String methods = queryMap.get(Constants.METHODS_KEY);
         this.serviceMethods = methods == null ? null : Constants.COMMA_SPLIT_PATTERN.split(methods);
     }

@@ -69,6 +69,11 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
     private static final Cluster cluster = ExtensionLoader.getExtensionLoader(Cluster.class).getAdaptiveExtension();
 
     private static final ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
+    /**
+     * 服务引用 URL 数组
+     * 0 = {URL@23586} "registry://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&refer=application%3Dxianzhi_admin_consumer%26check%3Dfalse%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.xiamendeposit.XiamenDepositApi%26methods%3DqueryTransaction%2CfundTransferredOut%2CcgtQueryTransBatch%2CqueryDepositProductInfor%2CqueryDepositUserInfor%2CmodifyCgtProductStatus%2CqueryPlatformInfor%2CsyncTransaction%26monitor%3Ddubbo%253A%252F%252F192.168.0.197%253A2181%252Fcom.alibaba.dubbo.registry.RegistryService%253Fapplication%253Dxianzhi_admin_consumer%2526dubbo%253D2.5.3%2526pid%253D25436%2526protocol%253Dregistry%2526refer%253Ddubbo%25253D2.5.3%252526interface%25253Dcom.alibaba.dubbo.monitor.MonitorService%252526pid%25253D25436%252526timestamp%25253D1574857342514%2526registry%253Dzookeeper%2526timestamp%253D1574857342514%26pid%3D25436%26revision%3D14.13%26side%3Dconsumer%26timestamp%3D1574857342488&registry=zookeeper&timestamp=1574857342514"
+     * 1 = {URL@23587} "registry://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&refer=application%3Dxianzhi_admin_consumer%26check%3Dfalse%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.xiamendeposit.XiamenDepositApi%26methods%3DqueryTransaction%2CfundTransferredOut%2CcgtQueryTransBatch%2CqueryDepositProductInfor%2CqueryDepositUserInfor%2CmodifyCgtProductStatus%2CqueryPlatformInfor%2CsyncTransaction%26monitor%3Ddubbo%253A%252F%252F192.168.0.197%253A2181%252Fcom.alibaba.dubbo.registry.RegistryService%253Fapplication%253Dxianzhi_admin_consumer%2526dubbo%253D2.5.3%2526pid%253D25436%2526protocol%253Dregistry%2526refer%253Ddubbo%25253D2.5.3%252526interface%25253Dcom.alibaba.dubbo.monitor.MonitorService%252526pid%25253D25436%252526timestamp%25253D1574859431580%2526registry%253Dzookeeper%2526timestamp%253D1574858899432%26pid%3D25436%26revision%3D14.13%26side%3Dconsumer%26timestamp%3D1574858458353&registry=zookeeper&timestamp=1574858899432"
+     */
     private final List<URL> urls = new ArrayList<URL>();
     // interface name
     private String interfaceName;
@@ -76,6 +81,12 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
     // client type
     private String client;
     // url for peer-to-peer invocation
+    /**
+     * 直连服务地址
+     *
+     * 1. 可以是注册中心，也可以是服务提供者
+     * 2. 可配置多个，使用 ; 分隔
+     */
     private String url;
     // method configs
     private List<MethodConfig> methods;
@@ -164,7 +175,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
      * @return
      */
     public synchronized T get() {
-        // 已销毁，不可获得
+        // 已销毁，不可获得  false
         if (destroyed) {
             throw new IllegalStateException("Already destroyed!");
         }
@@ -198,7 +209,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
             return;
         }
         initialized = true;
-        // 校验接口名非空
+        // 校验接口名非空 com.xianzhi.apis.xiamendeposit.XiamenDepositApi
         if (interfaceName == null || interfaceName.length() == 0) {
             throw new IllegalStateException("<dubbo:reference interface=\"\" /> interface not allow null!");
         }
@@ -208,7 +219,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         appendProperties(this);
         // 若未设置 `generic` 属性，使用 `ConsumerConfig.generic` 属性。
         if (getGeneric() == null && getConsumer() != null) {
-            setGeneric(getConsumer().getGeneric());
+            setGeneric(getConsumer().getGeneric()); // null
         }
         // 泛化接口的实现
         if (ProtocolUtils.isGeneric(getGeneric())) {
@@ -216,6 +227,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         } else {
             // 普通接口的实现
             try {
+                // interface com.xianzhi.apis.xiamendeposit.XiamenDepositApi
                 interfaceClass = Class.forName(interfaceName, true, Thread.currentThread()
                         .getContextClassLoader());
             } catch (ClassNotFoundException e) {
@@ -226,6 +238,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         }
         // 直连提供者，参见文档《直连提供者》http://dubbo.apache.org/zh-cn/docs/user/demos/explicit-target.html
         // 【直连提供者】第一优先级，通过 -D 参数指定 ，例如 java -Dcom.alibaba.xxx.XxxService=dubbo://localhost:20890
+//         null
         String resolve = System.getProperty(interfaceName);
         String resolveFile = null;
         // 【直连提供者】第二优先级，通过文件映射，例如 com.alibaba.xxx.XxxService=dubbo://localhost:20890
@@ -366,8 +379,20 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         map.put(Constants.REGISTER_IP_KEY, hostToRegistry);
 
         //attributes are stored by system context.
-        // 添加到 StaticContext 进行缓存
+        // 添加到 StaticContext 进行缓存  attributes = 0个
         StaticContext.getSystemContext().putAll(attributes);
+        /**
+         * map :
+         * 0 = {HashMap$Node@16175} "side" -> "consumer"
+         * 1 = {HashMap$Node@16292} "application" -> "xianzhi_admin_consumer"
+         * 2 = {HashMap$Node@16293} "methods" -> "queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction"
+         * 3 = {HashMap$Node@16176} "dubbo" -> "2.5.3"
+         * 4 = {HashMap$Node@16294} "pid" -> "25436"
+         * 5 = {HashMap$Node@16295} "check" -> "false"
+         * 6 = {HashMap$Node@16296} "interface" -> "com.xianzhi.apis.xiamendeposit.XiamenDepositApi"
+         * 7 = {HashMap$Node@16177} "timestamp" -> "1574858458353"
+         * 8 = {HashMap$Node@16297} "revision" -> "14.13"
+         */
         ref = createProxy(map);
         ConsumerModel consumerModel = new ConsumerModel(getUniqueServiceName(), this, ref, interfaceClass.getMethods());
         ApplicationModel.initConsumerModel(getUniqueServiceName(), consumerModel);
@@ -375,10 +400,12 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
 
     @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
     private T createProxy(Map<String, String> map) {
+//        temp://localhost?application=xianzhi_admin_consumer&check=false&dubbo=2.5.3&interface=com.xianzhi.apis.xiamendeposit.XiamenDepositApi&methods=queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction&pid=25436&revision=14.13&side=consumer&timestamp=1574858458353
         URL tmpUrl = new URL("temp", "localhost", 0, map);
+        // // 【省略代码】是否本地引用
         final boolean isJvmRefer;
-        if (isInjvm() == null) {
-            if (url != null && url.length() > 0) { // if a url is specified, don't do local reference
+        if (isInjvm() == null) { // = null
+            if (url != null && url.length() > 0) { // if a url is specified, don't do local reference = null
                 isJvmRefer = false;
             } else if (InjvmProtocol.getInjvmProtocol().isInjvmRefer(tmpUrl)) {
                 // by default, reference local service if there is
@@ -390,60 +417,93 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
             isJvmRefer = isInjvm().booleanValue();
         }
 
-        if (isJvmRefer) {
+        if (isJvmRefer) {// false
             URL url = new URL(Constants.LOCAL_PROTOCOL, NetUtils.LOCALHOST, 0, interfaceClass.getName()).addParameters(map);
             invoker = refprotocol.refer(interfaceClass, url);
             if (logger.isInfoEnabled()) {
                 logger.info("Using injvm service " + interfaceClass.getName());
             }
         } else {
+            // 定义直连地址，可以是服务提供者的地址，也可以是注册中心的地址
             if (url != null && url.length() > 0) { // user specified URL, could be peer-to-peer address, or register center's address.
+                // 拆分地址成数组，使用 ";" 分隔。
                 String[] us = Constants.SEMICOLON_SPLIT_PATTERN.split(url);
+                // 循环数组，添加到 `url` 中。
                 if (us != null && us.length > 0) {
                     for (String u : us) {
+                        // 创建 URL 对象
                         URL url = URL.valueOf(u);
+                        // 设置默认路径
                         if (url.getPath() == null || url.getPath().length() == 0) {
                             url = url.setPath(interfaceName);
                         }
+                        // 注册中心的地址，带上服务引用的配置参数
                         if (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) {
                             urls.add(url.addParameterAndEncoded(Constants.REFER_KEY, StringUtils.toQueryString(map)));
                         } else {
+                            // 服务提供者的地址
                             urls.add(ClusterUtils.mergeUrl(url, map));
                         }
                     }
                 }
             } else { // assemble URL from register center's configuration
+                // 加载注册中心 URL 数组
                 List<URL> us = loadRegistries(false);
+                // 循环数组，添加到 `url` 中。
+//                registry://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&registry=zookeeper&timestamp=1574858899432
                 if (us != null && !us.isEmpty()) {
                     for (URL u : us) {
+                        // 加载监控中心 URL
+                        // dubbo://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&protocol=registry&refer=dubbo%3D2.5.3%26interface%3Dcom.alibaba.dubbo.monitor.MonitorService%26pid%3D25436%26timestamp%3D1574859431580&registry=zookeeper&timestamp=1574858899432
                         URL monitorUrl = loadMonitor(u);
+                        // 服务引用配置对象 `map`，带上监控中心的 URL
                         if (monitorUrl != null) {
+                            /**
+                             *  0 = {HashMap$Node@16175} "side" -> "consumer"
+                             * 1 = {HashMap$Node@16292} "application" -> "xianzhi_admin_consumer"
+                             * 2 = {HashMap$Node@16293} "methods" -> "queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction"
+                             * 3 = {HashMap$Node@16176} "dubbo" -> "2.5.3"
+                             * 4 = {HashMap$Node@16294} "pid" -> "25436"
+                             * 5 = {HashMap$Node@23482} "monitor" -> "dubbo%3A%2F%2F192.168.0.197%3A2181%2Fcom.alibaba.dubbo.registry.RegistryService%3Fapplication%3Dxianzhi_admin_consumer%26dubbo%3D2.5.3%26pid%3D25436%26protocol%3Dregistry%26refer%3Ddubbo%253D2.5.3%2526interface%253Dcom.alibaba.dubbo.monitor.MonitorService%2526pid%253D25436%2526timestamp%253D1574859431580%26registry%3Dzookeeper%26timestamp%3D1574858899432"
+                             * 6 = {HashMap$Node@16295} "check" -> "false"
+                             * 7 = {HashMap$Node@16296} "interface" -> "com.xianzhi.apis.xiamendeposit.XiamenDepositApi"
+                             * 8 = {HashMap$Node@16177} "timestamp" -> "1574858458353"
+                             * 9 = {HashMap$Node@16297} "revision" -> "14.13"
+                             */
                             map.put(Constants.MONITOR_KEY, URL.encode(monitorUrl.toFullString()));
                         }
-                        urls.add(u.addParameterAndEncoded(Constants.REFER_KEY, StringUtils.toQueryString(map)));
+                        // 注册中心的地址，带上服务引用的配置参数
+                        urls.add(u.addParameterAndEncoded(Constants.REFER_KEY, StringUtils.toQueryString(map)));// 注册中心，带上服务引用的配置参数
                     }
                 }
                 if (urls.isEmpty()) {
                     throw new IllegalStateException("No such any registry to reference " + interfaceName + " on the consumer " + NetUtils.getLocalHost() + " use dubbo version " + Version.getVersion() + ", please config <dubbo:registry address=\"...\" /> to your spring config.");
                 }
             }
-
+            // 单 `urls` 时，引用服务，返回 Invoker 对象
             if (urls.size() == 1) {
+                // 引用服务
                 invoker = refprotocol.refer(interfaceClass, urls.get(0));
             } else {
+                // 循环 `urls` ，引用服务，返回 Invoker 对象
                 List<Invoker<?>> invokers = new ArrayList<Invoker<?>>();
                 URL registryURL = null;
                 for (URL url : urls) {
+                    // 引用服务
                     invokers.add(refprotocol.refer(interfaceClass, url));
+                    // 使用最后一个注册中心的 URL
                     if (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) {
+                        // registry://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&refer=application%3Dxianzhi_admin_consumer%26check%3Dfalse%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.xiamendeposit.XiamenDepositApi%26methods%3DqueryTransaction%2CfundTransferredOut%2CcgtQueryTransBatch%2CqueryDepositProductInfor%2CqueryDepositUserInfor%2CmodifyCgtProductStatus%2CqueryPlatformInfor%2CsyncTransaction%26monitor%3Ddubbo%253A%252F%252F192.168.0.197%253A2181%252Fcom.alibaba.dubbo.registry.RegistryService%253Fapplication%253Dxianzhi_admin_consumer%2526dubbo%253D2.5.3%2526pid%253D25436%2526protocol%253Dregistry%2526refer%253Ddubbo%25253D2.5.3%252526interface%25253Dcom.alibaba.dubbo.monitor.MonitorService%252526pid%25253D25436%252526timestamp%25253D1574859431580%2526registry%253Dzookeeper%2526timestamp%253D1574858899432%26pid%3D25436%26revision%3D14.13%26side%3Dconsumer%26timestamp%3D1574858458353&registry=zookeeper&timestamp=1574858899432
                         registryURL = url; // use last registry url
                     }
                 }
-                if (registryURL != null) { // registry url is available
-                    // use AvailableCluster only when register's cluster is available
+                // 有注册中心
+                if (registryURL != null) { // registry url is available // 有 注册中心协议的URL
+                    // use AvailableCluster only when register's cluster is available  // 对有注册中心的Cluster 只用 AvailableCluster
                     URL u = registryURL.addParameter(Constants.CLUSTER_KEY, AvailableCluster.NAME);
                     invoker = cluster.join(new StaticDirectory(u, invokers));
                 } else { // not a registry url
+                    // 无注册中心
                     invoker = cluster.join(new StaticDirectory(invokers));
                 }
             }

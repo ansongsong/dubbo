@@ -46,8 +46,34 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
 
     private static final Logger logger = LoggerFactory
             .getLogger(AbstractClusterInvoker.class);
+    /**
+     * RegistryDirectofy
+     *
+     * protocol = {Protocol$Adpative@24269}
+     * registry = {ZookeeperRegistry@24480} "zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&interface=com.alibaba.dubbo.registry.RegistryService&pid=25436&timestamp=1574857317102"
+     * serviceKey = "com.alibaba.dubbo.registry.RegistryService"
+     * serviceType = {Class@8882} "interface com.xianzhi.apis.xiamendeposit.XiamenDepositApi"
+     * queryMap = {HashMap@29946}  size = 10
+     * directoryUrl = {URL@29947} "zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&check=false&dubbo=2.5.3&interface=com.xianzhi.apis.xiamendeposit.XiamenDepositApi&methods=queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction&pid=25436&revision=14.13&side=consumer&timestamp=1574858458353"
+     * serviceMethods = {String[8]@29948}
+     * multiGroup = false
+     * forbidden = true
+     * overrideDirectoryUrl = {URL@29947} "zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&check=false&dubbo=2.5.3&interface=com.xianzhi.apis.xiamendeposit.XiamenDepositApi&methods=queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction&pid=25436&revision=14.13&side=consumer&timestamp=1574858458353"
+     * configurators = {ArrayList@29949}  size = 0
+     * urlInvokerMap = null
+     * methodInvokerMap = null
+     * cachedInvokerUrls = {HashSet@29950}  size = 0
+     * url = {URL@28811} "zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&refer=application%3Dxianzhi_admin_consumer%26check%3Dfalse%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.xiamendeposit.XiamenDepositApi%26methods%3DqueryTransaction%2CfundTransferredOut%2CcgtQueryTransBatch%2CqueryDepositProductInfor%2CqueryDepositUserInfor%2CmodifyCgtProductStatus%2CqueryPlatformInfor%2CsyncTransaction%26monitor%3Ddubbo%253A%252F%252F192.168.0.197%253A2181%252Fcom.alibaba.dubbo.registry.RegistryService%253Fapplication%253Dxianzhi_admin_consumer%2526dubbo%253D2.5.3%2526pid%253D25436%2526protocol%253Dregistry%2526refer%253Ddubbo%25253D2.5.3%252526interface%25253Dcom.alibaba.dubbo.monitor.MonitorService%252526pid%25253D25436%252526timestamp%25253D1574859431580%2526registry%253Dzookeeper%2526timestamp%253D1574858899432%26pid%3D25436%26revision%3D14.13%26side%3Dconsumer%26timestamp%3D1574858458353&timestamp=1574858899432"
+     * destroyed = false
+     * consumerUrl = {URL@29662} "consumer://192.168.10.28/com.xianzhi.apis.xiamendeposit.XiamenDepositApi?application=xianzhi_admin_consumer&category=providers,configurators,routers&check=false&dubbo=2.5.3&interface=com.xianzhi.apis.xiamendeposit.XiamenDepositApi&methods=queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction&pid=25436&revision=14.13&side=consumer&timestamp=1574858458353"
+     * routers = {ArrayList@29951}  size = 1
+     *
+     */
     protected final Directory<T> directory;
 
+    /**
+     *  true
+     */
     protected final boolean availablecheck;
 
     private AtomicBoolean destroyed = new AtomicBoolean(false);
@@ -95,10 +121,10 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
 
     /**
      * Select a invoker using loadbalance policy.</br>
-     * a)Firstly, select an invoker using loadbalance. If this invoker is in previously selected list, or, 
+     * a)Firstly, select an invoker using loadbalance. If this invoker is in previously selected list, or,
      * if this invoker is unavailable, then continue step b (reselect), otherwise return the first selected invoker</br>
      * b)Reslection, the validation rule for reselection: selected > available. This rule guarantees that
-     * the selected invoker has the minimum chance to be one in the previously selected list, and also 
+     * the selected invoker has the minimum chance to be one in the previously selected list, and also
      * guarantees this invoker is available.
      *
      * @param loadbalance load balance policy

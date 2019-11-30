@@ -99,6 +99,8 @@ public abstract class AbstractConfig implements Serializable {
         if (config == null) {
             return;
         }
+        // dubbo.consumer.    ReferenceBean     <dubbo:reference object="com.alibaba.dubbo.common.bytecode.proxy3@586ace73" singleton="true" interface="com.xianzhi.apis.xiamendeposit.XiamenDepositApi" generic="false" check="false" id="xiamenDepositApi" />
+//        dubbo.reference.    ConsumerConfig
         String prefix = "dubbo." + getTagName(config.getClass()) + ".";
         Method[] methods = config.getClass().getMethods();
         for (Method method : methods) {

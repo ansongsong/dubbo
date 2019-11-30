@@ -37,6 +37,7 @@ public abstract class AbstractProxyFactory implements ProxyFactory {
     @Override
     public <T> T getProxy(Invoker<T> invoker, boolean generic) throws RpcException {
         Class<?>[] interfaces = null;
+        // url : registry://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&cluster=available&dubbo=2.5.3&pid=25436&refer=application%3Dxianzhi_admin_consumer%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.coupon.CouponClientApi%26methods%3DautoSendCouponByPkgId%2CfrozenCoupon%2CeditCouponLangs%2CconsumeCouponCL%2CconsumeCoupon%2CexchangeAutoByType%26monitor%3Ddubbo%253A%252F%252F192.168.0.197%253A2181%252Fcom.alibaba.dubbo.registry.RegistryService%253Fapplication%253Dxianzhi_admin_consumer%2526dubbo%253D2.5.3%2526pid%253D25436%2526protocol%253Dregistry%2526refer%253Ddubbo%25253D2.5.3%252526interface%25253Dcom.alibaba.dubbo.monitor.MonitorService%252526pid%25253D25436%252526timestamp%25253D1574912187698%2526registry%253Dzookeeper%2526timestamp%253D1574912187695%26pid%3D25436%26revision%3D14.13%26side%3Dconsumer%26timestamp%3D1574912187689&registry=zookeeper&timestamp=1574912187695
         String config = invoker.getUrl().getParameter("interfaces");
         if (config != null && config.length() > 0) {
             String[] types = Constants.COMMA_SPLIT_PATTERN.split(config);
@@ -51,6 +52,7 @@ public abstract class AbstractProxyFactory implements ProxyFactory {
         }
         // 增加 EchoService 接口，用于回生测试。参见文档《回声测试》http://dubbo.apache.org/zh-cn/docs/user/demos/echo-service.html
         if (interfaces == null) {
+            // invoker.getInterface = interface com.xianzhi.apis.coupon.CouponClientApi
             interfaces = new Class<?>[]{invoker.getInterface(), EchoService.class};
         }
 

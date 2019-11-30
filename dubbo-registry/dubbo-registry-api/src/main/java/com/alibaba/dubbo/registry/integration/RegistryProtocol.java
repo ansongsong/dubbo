@@ -305,17 +305,40 @@ public class RegistryProtocol implements Protocol {
         return key;
     }
 
+    /**
+     *
+     * @param type Service class  interface com.xianzhi.apis.xiamendeposit.XiamenDepositApi
+     * @param url  URL address for the remote service registry://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&refer=application%3Dxianzhi_admin_consumer%26check%3Dfalse%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.xiamendeposit.XiamenDepositApi%26methods%3DqueryTransaction%2CfundTransferredOut%2CcgtQueryTransBatch%2CqueryDepositProductInfor%2CqueryDepositUserInfor%2CmodifyCgtProductStatus%2CqueryPlatformInfor%2CsyncTransaction%26monitor%3Ddubbo%253A%252F%252F192.168.0.197%253A2181%252Fcom.alibaba.dubbo.registry.RegistryService%253Fapplication%253Dxianzhi_admin_consumer%2526dubbo%253D2.5.3%2526pid%253D25436%2526protocol%253Dregistry%2526refer%253Ddubbo%25253D2.5.3%252526interface%25253Dcom.alibaba.dubbo.monitor.MonitorService%252526pid%25253D25436%252526timestamp%25253D1574857342514%2526registry%253Dzookeeper%2526timestamp%253D1574857342514%26pid%3D25436%26revision%3D14.13%26side%3Dconsumer%26timestamp%3D1574857342488&registry=zookeeper&timestamp=1574857342514
+     * @param <T>
+     * @return
+     * @throws RpcException
+     */
     @Override
     @SuppressWarnings("unchecked")
     public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
+        //zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&refer=application%3Dxianzhi_admin_consumer%26check%3Dfalse%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.xiamendeposit.XiamenDepositApi%26methods%3DqueryTransaction%2CfundTransferredOut%2CcgtQueryTransBatch%2CqueryDepositProductInfor%2CqueryDepositUserInfor%2CmodifyCgtProductStatus%2CqueryPlatformInfor%2CsyncTransaction%26monitor%3Ddubbo%253A%252F%252F192.168.0.197%253A2181%252Fcom.alibaba.dubbo.registry.RegistryService%253Fapplication%253Dxianzhi_admin_consumer%2526dubbo%253D2.5.3%2526pid%253D25436%2526protocol%253Dregistry%2526refer%253Ddubbo%25253D2.5.3%252526interface%25253Dcom.alibaba.dubbo.monitor.MonitorService%252526pid%25253D25436%252526timestamp%25253D1574857342514%2526registry%253Dzookeeper%2526timestamp%253D1574857342514%26pid%3D25436%26revision%3D14.13%26side%3Dconsumer%26timestamp%3D1574857342488&timestamp=1574857342514
         url = url.setProtocol(url.getParameter(Constants.REGISTRY_KEY, Constants.DEFAULT_REGISTRY)).removeParameter(Constants.REGISTRY_KEY);
         Registry registry = registryFactory.getRegistry(url);
+        // type = interface com.xianzhi.apis.xiamendeposit.XiamenDepositApi
         if (RegistryService.class.equals(type)) {
             return proxyFactory.getInvoker((T) registry, type, url);
         }
 
         // group="a,b" or group="*"
+        /**
+         * 0 = {HashMap$Node@24779} "side" -> "consumer"
+         * 1 = {HashMap$Node@24780} "application" -> "xianzhi_admin_consumer"
+         * 2 = {HashMap$Node@24781} "methods" -> "queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction"
+         * 3 = {HashMap$Node@24782} "dubbo" -> "2.5.3"
+         * 4 = {HashMap$Node@24783} "monitor" -> "dubbo%3A%2F%2F192.168.0.197%3A2181%2Fcom.alibaba.dubbo.registry.RegistryService%3Fapplication%3Dxianzhi_admin_consumer%26dubbo%3D2.5.3%26pid%3D25436%26protocol%3Dregistry%26refer%3Ddubbo%253D2.5.3%2526interface%253Dcom.alibaba.dubbo.monitor.MonitorService%2526pid%253D25436%2526timestamp%253D1574857342514%26registry%3Dzookeeper%26timestamp%3D1574857342514"
+         * 5 = {HashMap$Node@24784} "pid" -> "25436"
+         * 6 = {HashMap$Node@24785} "check" -> "false"
+         * 7 = {HashMap$Node@24786} "interface" -> "com.xianzhi.apis.xiamendeposit.XiamenDepositApi"
+         * 8 = {HashMap$Node@24787} "revision" -> "14.13"
+         * 9 = {HashMap$Node@24788} "timestamp" -> "1574857342488"
+         */
         Map<String, String> qs = StringUtils.parseQueryString(url.getParameterAndDecoded(Constants.REFER_KEY));
+        // null
         String group = qs.get(Constants.GROUP_KEY);
         if (group != null && group.length() > 0) {
             if ((Constants.COMMA_SPLIT_PATTERN.split(group)).length > 1
@@ -330,24 +353,59 @@ public class RegistryProtocol implements Protocol {
         return ExtensionLoader.getExtensionLoader(Cluster.class).getExtension("mergeable");
     }
 
+    /**
+     *
+     * @param cluster Cluster$Adpative
+     * @param registry  zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&interface=com.alibaba.dubbo.registry.RegistryService&pid=25436&timestamp=1574857317102
+     * @param type  interface com.xianzhi.apis.xiamendeposit.XiamenDepositApi
+     * @param url zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&refer=application%3Dxianzhi_admin_consumer%26check%3Dfalse%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.xiamendeposit.XiamenDepositApi%26methods%3DqueryTransaction%2CfundTransferredOut%2CcgtQueryTransBatch%2CqueryDepositProductInfor%2CqueryDepositUserInfor%2CmodifyCgtProductStatus%2CqueryPlatformInfor%2CsyncTransaction%26monitor%3Ddubbo%253A%252F%252F192.168.0.197%253A2181%252Fcom.alibaba.dubbo.registry.RegistryService%253Fapplication%253Dxianzhi_admin_consumer%2526dubbo%253D2.5.3%2526pid%253D25436%2526protocol%253Dregistry%2526refer%253Ddubbo%25253D2.5.3%252526interface%25253Dcom.alibaba.dubbo.monitor.MonitorService%252526pid%25253D25436%252526timestamp%25253D1574857342514%2526registry%253Dzookeeper%2526timestamp%253D1574857342514%26pid%3D25436%26revision%3D14.13%26side%3Dconsumer%26timestamp%3D1574857342488&timestamp=1574857342514
+     * @param <T>
+     * @return
+     */
     private <T> Invoker<T> doRefer(Cluster cluster, Registry registry, Class<T> type, URL url) {
         RegistryDirectory<T> directory = new RegistryDirectory<T>(type, url);
         directory.setRegistry(registry);
         directory.setProtocol(protocol);
         // all attributes of REFER_KEY
         Map<String, String> parameters = new HashMap<String, String>(directory.getUrl().getParameters());
+//        consumer://192.168.10.28/com.xianzhi.apis.xiamendeposit.XiamenDepositApi?application=xianzhi_admin_consumer&check=false&dubbo=2.5.3&interface=com.xianzhi.apis.xiamendeposit.XiamenDepositApi&methods=queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction&pid=25436&revision=14.13&side=consumer&timestamp=1574857342488
         URL subscribeUrl = new URL(Constants.CONSUMER_PROTOCOL, parameters.remove(Constants.REGISTER_IP_KEY), 0, type.getName(), parameters);
+        // // 向注册中心注册自己（服务消费者）
         if (!Constants.ANY_VALUE.equals(url.getServiceInterface())
                 && url.getParameter(Constants.REGISTER_KEY, true)) {
             URL registeredConsumerUrl = getRegisteredConsumerUrl(subscribeUrl, url);
             registry.register(registeredConsumerUrl);
             directory.setRegisteredConsumerUrl(registeredConsumerUrl);
         }
+        // 向注册中心订阅服务提供者
         directory.subscribe(subscribeUrl.addParameter(Constants.CATEGORY_KEY,
                 Constants.PROVIDERS_CATEGORY
                         + "," + Constants.CONFIGURATORS_CATEGORY
                         + "," + Constants.ROUTERS_CATEGORY));
 
+        /**
+         * Cluster$Adpative
+         *
+         *
+         * protocol = {Protocol$Adpative@24269}
+         * registry = {ZookeeperRegistry@24480} "zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&interface=com.alibaba.dubbo.registry.RegistryService&pid=25436&timestamp=1574857317102"
+         * serviceKey = "com.alibaba.dubbo.registry.RegistryService"
+         * serviceType = {Class@8882} "interface com.xianzhi.apis.xiamendeposit.XiamenDepositApi"
+         * queryMap = {HashMap@29946}  size = 10
+         * directoryUrl = {URL@29947} "zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&check=false&dubbo=2.5.3&interface=com.xianzhi.apis.xiamendeposit.XiamenDepositApi&methods=queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction&pid=25436&revision=14.13&side=consumer&timestamp=1574858458353"
+         * serviceMethods = {String[8]@29948}
+         * multiGroup = false
+         * forbidden = true
+         * overrideDirectoryUrl = {URL@29947} "zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&check=false&dubbo=2.5.3&interface=com.xianzhi.apis.xiamendeposit.XiamenDepositApi&methods=queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction&pid=25436&revision=14.13&side=consumer&timestamp=1574858458353"
+         * configurators = {ArrayList@29949}  size = 0
+         * urlInvokerMap = null
+         * methodInvokerMap = null
+         * cachedInvokerUrls = {HashSet@29950}  size = 0
+         * url = {URL@28811} "zookeeper://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&refer=application%3Dxianzhi_admin_consumer%26check%3Dfalse%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.xiamendeposit.XiamenDepositApi%26methods%3DqueryTransaction%2CfundTransferredOut%2CcgtQueryTransBatch%2CqueryDepositProductInfor%2CqueryDepositUserInfor%2CmodifyCgtProductStatus%2CqueryPlatformInfor%2CsyncTransaction%26monitor%3Ddubbo%253A%252F%252F192.168.0.197%253A2181%252Fcom.alibaba.dubbo.registry.RegistryService%253Fapplication%253Dxianzhi_admin_consumer%2526dubbo%253D2.5.3%2526pid%253D25436%2526protocol%253Dregistry%2526refer%253Ddubbo%25253D2.5.3%252526interface%25253Dcom.alibaba.dubbo.monitor.MonitorService%252526pid%25253D25436%252526timestamp%25253D1574859431580%2526registry%253Dzookeeper%2526timestamp%253D1574858899432%26pid%3D25436%26revision%3D14.13%26side%3Dconsumer%26timestamp%3D1574858458353&timestamp=1574858899432"
+         * destroyed = false
+         * consumerUrl = {URL@29662} "consumer://192.168.10.28/com.xianzhi.apis.xiamendeposit.XiamenDepositApi?application=xianzhi_admin_consumer&category=providers,configurators,routers&check=false&dubbo=2.5.3&interface=com.xianzhi.apis.xiamendeposit.XiamenDepositApi&methods=queryTransaction,fundTransferredOut,cgtQueryTransBatch,queryDepositProductInfor,queryDepositUserInfor,modifyCgtProductStatus,queryPlatformInfor,syncTransaction&pid=25436&revision=14.13&side=consumer&timestamp=1574858458353"
+         * routers = {ArrayList@29951}  size = 1
+         */
         Invoker invoker = cluster.join(directory);
         ProviderConsumerRegTable.registerConsumer(invoker, url, subscribeUrl, directory);
         return invoker;
