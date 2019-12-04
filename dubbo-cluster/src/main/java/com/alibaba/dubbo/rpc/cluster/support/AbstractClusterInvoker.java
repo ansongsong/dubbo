@@ -296,6 +296,7 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
         }
     }
 
+
     protected abstract Result doInvoke(Invocation invocation, List<Invoker<T>> invokers,
                                        LoadBalance loadbalance) throws RpcException;
 

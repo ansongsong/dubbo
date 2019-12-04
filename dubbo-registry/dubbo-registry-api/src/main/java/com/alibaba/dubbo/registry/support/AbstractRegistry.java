@@ -376,6 +376,20 @@ public abstract class AbstractRegistry implements Registry {
         }
     }
 
+    /**
+     *
+     * @param url  consumer://10.0.2.69/com.xianzhi.apis.rna.RnaApi?application=xianzhi_admin_consumer&category=providers,configurators,routers&dubbo=2.5.3&interface=com.xianzhi.apis.rna.RnaApi&methods=getUnameByNameAndCard,getOneUserRealName,check,isExistsCardId,getUnameByCardID,isRealNamePass,getUnamesByBirthday,checkAndRecord,getUnameByRealName,checkAndRecordDeposit&pid=133556&revision=14.13&side=consumer&timestamp=1575107750415
+     *
+     * @param listener
+     *
+     *
+     * 0 = {URL@8119} "dubbo://192.168.0.186:25885/com.xianzhi.apis.rna.RnaApi?accesslog=/data/xianzhi_rna/access.log&anyhost=true&application=xianzhi_rna_provider&check.retries=0&checkAndRecord.retries=0&dubbo=1.0&generic=false&interface=com.xianzhi.apis.rna.RnaApi&methods=getOneUserRealName,getUnameByNameAndCard,check,isExistsCardId,getUnameByCardID,isRealNamePass,getUnamesByBirthday,checkAndRecord,getUnameByRealName,checkAndRecordDeposit&pid=1508&revision=1.0&side=provider&timeout=30000&timestamp=1562843580100"
+     * 1 = {URL@8120} "rest://192.168.0.186:8090/com.xianzhi.apis.rna.RnaApi?accesslog=/data/xianzhi_rna/access.log&anyhost=true&application=xianzhi_rna_provider&check.retries=0&checkAndRecord.retries=0&dubbo=1.0&generic=false&interface=com.xianzhi.apis.rna.RnaApi&methods=getOneUserRealName,getUnameByNameAndCard,check,isExistsCardId,getUnameByCardID,isRealNamePass,getUnamesByBirthday,checkAndRecord,getUnameByRealName,checkAndRecordDeposit&pid=1508&revision=1.0&server=tomcat&side=provider&timeout=30000&timestamp=1562843580737"
+     * 2 = {URL@8121} "empty://10.0.2.69/com.xianzhi.apis.rna.RnaApi?application=xianzhi_admin_consumer&category=configurators&dubbo=2.5.3&interface=com.xianzhi.apis.rna.RnaApi&methods=getUnameByNameAndCard,getOneUserRealName,check,isExistsCardId,getUnameByCardID,isRealNamePass,getUnamesByBirthday,checkAndRecord,getUnameByRealName,checkAndRecordDeposit&pid=133556&revision=14.13&side=consumer&timestamp=1575107750415"
+     * 3 = {URL@8122} "empty://10.0.2.69/com.xianzhi.apis.rna.RnaApi?application=xianzhi_admin_consumer&category=routers&dubbo=2.5.3&interface=com.xianzhi.apis.rna.RnaApi&methods=getUnameByNameAndCard,getOneUserRealName,check,isExistsCardId,getUnameByCardID,isRealNamePass,getUnamesByBirthday,checkAndRecord,getUnameByRealName,checkAndRecordDeposit&pid=133556&revision=14.13&side=consumer&timestamp=1575107750415"
+     *
+     * @param urls
+     */
     protected void notify(URL url, NotifyListener listener, List<URL> urls) {
         if (url == null) {
             throw new IllegalArgumentException("notify url == null");

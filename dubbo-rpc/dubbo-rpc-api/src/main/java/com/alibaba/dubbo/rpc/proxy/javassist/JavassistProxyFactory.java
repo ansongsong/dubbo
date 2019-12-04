@@ -31,6 +31,13 @@ import com.alibaba.dubbo.rpc.proxy.InvokerInvocationHandler;
  */
 public class JavassistProxyFactory extends AbstractProxyFactory {
 
+    /**
+     * 消费者 调用
+     * @param invoker
+     * @param interfaces
+     * @param <T>
+     * @return
+     */
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getProxy(Invoker<T> invoker, Class<?>[] interfaces) {
@@ -38,7 +45,7 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
     }
 
     /**
-     *
+     *生产者 调用
      * @param proxy Service 对象。   articleServiceApiImpl
      * @param type Service 接口类型。  interface com.xianzhi.apis.search.ArticleServiceApi
      * @param url Service 对应的 Dubbo URL 。 registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi-search&dubbo=2.5.3&export=dubbo%3A%2F%2F192.168.10.28%3A20880%2Fcom.xianzhi.apis.search.ArticleServiceApi%3Fanyhost%3Dtrue%26application%3Dxianzhi-search%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.search.ArticleServiceApi%26methods%3Doffline%2CgetTitleByWordPage%2Csave%2Cupdate%2Conline%2CbulkUpdate%2CgetArticlesAndPage%2CupdateFileds%2Cdelete%2CfindByQueryParams%26pid%3D67648%26revision%3D11.8%26side%3Dprovider%26timestamp%3D1574751703678&pid=67648&registry=zookeeper&timestamp=1574751703663

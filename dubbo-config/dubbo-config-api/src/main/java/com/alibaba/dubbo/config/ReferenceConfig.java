@@ -447,7 +447,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
                     }
                 }
             } else { // assemble URL from register center's configuration
-                // 加载注册中心 URL 数组
+                // 加载注册中心 URL 数组  registry://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=131860&registry=zookeeper&timestamp=1575101450795
                 List<URL> us = loadRegistries(false);
                 // 循环数组，添加到 `url` 中。
 //                registry://192.168.0.197:2181/com.alibaba.dubbo.registry.RegistryService?application=xianzhi_admin_consumer&dubbo=2.5.3&pid=25436&registry=zookeeper&timestamp=1574858899432

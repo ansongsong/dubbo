@@ -64,11 +64,11 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
     private static final Logger logger = LoggerFactory.getLogger(DubboBeanDefinitionParser.class);
     private static final Pattern GROUP_AND_VERION = Pattern.compile("^[\\-.0-9_a-zA-Z]+(\\:[\\-.0-9_a-zA-Z]+)?$");
     /**
-     * Bean 对象的类
+     * Bean 对象的类 ReferenceBean.class
      */
     private final Class<?> beanClass;
     /**
-     * 是否需要 Bean 的 `id` 属性
+     * 是否需要 Bean 的 `id` 属性 false
      */
     private final boolean required;
 

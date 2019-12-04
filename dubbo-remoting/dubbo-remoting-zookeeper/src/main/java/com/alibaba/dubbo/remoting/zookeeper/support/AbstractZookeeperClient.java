@@ -50,6 +50,11 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
         return url;
     }
 
+    /**
+     *
+     * @param path  /dubbo/com.xianzhi.apis.rna.RnaApi/consumers/ consumer%3A%2F%2F10.0.2.69%2Fcom.xianzhi.apis.rna.RnaApi%3Fapplication%3Dxianzhi_admin_consumer%26category%3Dconsumers%26check%3Dfalse%26dubbo%3D2.5.3%26interface%3Dcom.xianzhi.apis.rna.RnaApi%26methods%3DgetUnameByNameAndCard%2CgetOneUserRealName%2Ccheck%2CisExistsCardId%2CgetUnameByCardID%2CisRealNamePass%2CgetUnamesByBirthday%2CcheckAndRecord%2CgetUnameByRealName%2CcheckAndRecordDeposit%26pid%3D131860%26revision%3D14.13%26side%3Dconsumer%26timestamp%3D1575101437548
+     * @param ephemeral  true
+     */
     @Override
     public void create(String path, boolean ephemeral) {
         if (!ephemeral) {
@@ -57,8 +62,12 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
                 return;
             }
         }
+        // 44  34
         int i = path.lastIndexOf('/');
         if (i > 0) {
+//            path.substring(0,44)  =  /dubbo/com.xianzhi.apis.rna.RnaApi/consumers
+//            path.substring(0,34)  =  /dubbo/com.xianzhi.apis.rna.RnaApi
+//            path.substring(0,34)  =  /dubbo
             create(path.substring(0, i), false);
         }
         if (ephemeral) {

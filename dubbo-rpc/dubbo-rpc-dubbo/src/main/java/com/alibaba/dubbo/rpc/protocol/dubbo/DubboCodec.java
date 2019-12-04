@@ -41,6 +41,7 @@ import java.io.InputStream;
 import static com.alibaba.dubbo.rpc.protocol.dubbo.CallbackServiceCodec.encodeInvocationArgument;
 
 /**
+ * 支持多消息的编解码器。
  * Dubbo codec.
  */
 public class DubboCodec extends ExchangeCodec implements Codec2 {
@@ -65,21 +66,27 @@ public class DubboCodec extends ExchangeCodec implements Codec2 {
         if ((flag & FLAG_REQUEST) == 0) {
             // decode response.
             Response res = new Response(id);
+            // 若是心跳事件，进行设置
             if ((flag & FLAG_EVENT) != 0) {
                 res.setEvent(Response.HEARTBEAT_EVENT);
             }
-            // get status.
+            // get status. // 设置状态
             byte status = header[3];
             res.setStatus(status);
             try {
+                // 正常响应状态
                 if (status == Response.OK) {
                     Object data;
+                    // 解码心跳事件
                     if (res.isHeartbeat()) {
                         data = decodeHeartbeatData(channel,  CodecSupport.deserialize(channel.getUrl(), is, proto));
                     } else if (res.isEvent()) {
+                        // 解码其它事件
                         data = decodeEventData(channel,  CodecSupport.deserialize(channel.getUrl(), is, proto));
                     } else {
+                        // 解码普通响应
                         DecodeableRpcResult result;
+                        // 在通信框架（例如，Netty）的 IO 线程，解码
                         if (channel.getUrl().getParameter(
                                 Constants.DECODE_IN_IO_THREAD_KEY,
                                 Constants.DEFAULT_DECODE_IN_IO_THREAD)) {
@@ -87,12 +94,14 @@ public class DubboCodec extends ExchangeCodec implements Codec2 {
                                     (Invocation) getRequestData(id), proto);
                             result.decode();
                         } else {
+                            // 在 Dubbo ThreadPool 线程，解码，使用 DecodeHandler
                             result = new DecodeableRpcResult(channel, res,
                                     new UnsafeByteArrayInputStream(readMessageData(is)),
                                     (Invocation) getRequestData(id), proto);
                         }
                         data = result;
                     }
+                    // 设置结果
                     res.setResult(data);
                 } else {
                     res.setErrorMessage(CodecSupport.deserialize(channel.getUrl(), is, proto).readUTF());
@@ -109,17 +118,23 @@ public class DubboCodec extends ExchangeCodec implements Codec2 {
             // decode request.
             Request req = new Request(id);
             req.setVersion(Version.getProtocolVersion());
+            // 是否需要响应
             req.setTwoWay((flag & FLAG_TWOWAY) != 0);
+            // 若是心跳事件，进行设置
             if ((flag & FLAG_EVENT) != 0) {
                 req.setEvent(Request.HEARTBEAT_EVENT);
             }
             try {
                 Object data;
+                // 解码心跳事件
                 if (req.isHeartbeat()) {
                     data = decodeHeartbeatData(channel, CodecSupport.deserialize(channel.getUrl(), is, proto));
                 } else if (req.isEvent()) {
+                    // 解码其它事件
                     data = decodeEventData(channel, CodecSupport.deserialize(channel.getUrl(), is, proto));
                 } else {
+                    // 解码普通请求
+                    // 在通信框架（例如，Netty）的 IO 线程，解码
                     DecodeableRpcInvocation inv;
                     if (channel.getUrl().getParameter(
                             Constants.DECODE_IN_IO_THREAD_KEY,
@@ -127,6 +142,7 @@ public class DubboCodec extends ExchangeCodec implements Codec2 {
                         inv = new DecodeableRpcInvocation(channel, req, is, proto);
                         inv.decode();
                     } else {
+                        // 在 Dubbo ThreadPool 线程，解码，使用 DecodeHandler
                         inv = new DecodeableRpcInvocation(channel, req,
                                 new UnsafeByteArrayInputStream(readMessageData(is)), proto);
                     }
