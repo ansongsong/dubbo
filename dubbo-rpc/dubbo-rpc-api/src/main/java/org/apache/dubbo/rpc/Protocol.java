@@ -42,7 +42,7 @@ public interface Protocol {
      * 2. export() must be idempotent, that is, there's no difference between invoking once and invoking twice when
      * export the same URL<br>
      * 3. Invoker instance is passed in by the framework, protocol needs not to care <br>
-     *
+     * export 参数列表中没有 URL 参数，因此需要从 Invoker 参数中获取 URL 数据
      * @param <T>     Service type
      * @param invoker Service invoker
      * @return exporter reference for exported service, useful for unexport the service later
@@ -62,7 +62,7 @@ public interface Protocol {
      *
      * @param <T>  Service type
      * @param type Service class
-     * @param url  URL address for the remote service
+     * @param url  URL address for the remote service  获取 URL 数据
      * @return invoker service's local proxy
      * @throws RpcException when there's any error while connecting to the service provider
      */

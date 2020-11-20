@@ -76,27 +76,42 @@ public class AdaptiveClassCodeGenerator {
 
     /**
      * test if given type has at least one method annotated with <code>SPI</code>
+     *   // 检测方法上是否有 Adaptive 注解
      */
     private boolean hasAdaptiveMethod() {
+        // 检测方法上是否有 Adaptive 注解
         return Arrays.stream(type.getMethods()).anyMatch(m -> m.isAnnotationPresent(Adaptive.class));
     }
 
     /**
      * generate and return class code
+     *
+     * 以 Dubbo 的 Protocol 接口为例，例如：
+     * package com.alibaba.dubbo.rpc;
+     * import com.alibaba.dubbo.common.extension.ExtensionLoader;
+     * public class Protocol$Adaptive implements com.alibaba.dubbo.rpc.Protocol {
+     *     // 省略方法代码
+     * }
      */
     public String generate() {
-        // no need to generate adaptive class since there's no adaptive method found.
+        // no need to generate adaptive class since there's no adaptive method found.   // 检测方法上是否有 Adaptive 注解
         if (!hasAdaptiveMethod()) {
+            // 若所有的方法上均无 Adaptive 注解，则抛出异常
             throw new IllegalStateException("No adaptive method exist on extension " + type.getName() + ", refuse to create the adaptive class!");
         }
-
+        // 通过 Adaptive 注解检测后，即可开始生成代码
         StringBuilder code = new StringBuilder();
+        // 首先会生成 package 语句: package + type 所在包
         code.append(generatePackageInfo());
+        // 然后生成 import 语句：import + ExtensionLoader 全限定名
         code.append(generateImports());
+        // 生成类名： public class + type简单名称 + $Adaptive + implements + type全限定名 + {
         code.append(generateClassDeclaration());
-
+        // 通过反射获取所有的方法
         Method[] methods = type.getMethods();
+        // 遍历方法列表
         for (Method method : methods) {
+            // ${生成方法}
             code.append(generateMethod(method));
         }
         code.append("}");
@@ -130,6 +145,11 @@ public class AdaptiveClassCodeGenerator {
 
     /**
      * generate method not annotated with Adaptive with throwing unsupported exception
+     * 1.如果方法上无 Adaptive 注解，则生成 throw new UnsupportedOperationException(...) 代码；
+     * 2.生成的代码格式如下：
+     *      throw new UnsupportedOperationException("method " + 方法签名 + of interface + 全限定接口名 + is not adaptive method!”)
+     * 3.以 Protocol 接口的 destroy 方法为例
+     *      throw new UnsupportedOperationException("method public abstract void com.alibaba.dubbo.rpc.Protocol.destroy() of interface com.alibaba.dubbo.rpc.Protocol is not adaptive method!");
      */
     private String generateUnsupported(Method method) {
         return String.format(CODE_UNSUPPORTED, method, type.getName());
@@ -137,10 +157,12 @@ public class AdaptiveClassCodeGenerator {
 
     /**
      * get index of parameter with type URL
+     *  遍历参数列表，确定 URL 参数位置
      */
     private int getUrlTypeIndex(Method method) {
         int urlTypeIndex = -1;
         Class<?>[] pts = method.getParameterTypes();
+        // 遍历参数列表，确定 URL 参数位置
         for (int i = 0; i < pts.length; ++i) {
             if (pts[i].equals(URL.class)) {
                 urlTypeIndex = i;
@@ -193,19 +215,22 @@ public class AdaptiveClassCodeGenerator {
     }
 
     /**
-     * generate method content
+     * generate method content 生成方法内容
      */
     private String generateMethodContent(Method method) {
         Adaptive adaptiveAnnotation = method.getAnnotation(Adaptive.class);
         StringBuilder code = new StringBuilder(512);
         if (adaptiveAnnotation == null) {
+            // 无 Adaptive 注解方法代码生成逻辑
             return generateUnsupported(method);
         } else {
+            // 被 Adaptive 注解修饰   遍历参数列表，确定 URL 参数位置
             int urlTypeIndex = getUrlTypeIndex(method);
 
             // found parameter in URL type
+            // urlTypeIndex != -1，表示参数列表中存在 URL 参数
             if (urlTypeIndex != -1) {
-                // Null Point check
+                // Null Point check  为 URL 类型参数生成判空代码，格式如下
                 code.append(generateUrlNullCheck(urlTypeIndex));
             } else {
                 // did not find parameter in URL type

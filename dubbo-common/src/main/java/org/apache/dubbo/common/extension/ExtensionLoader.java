@@ -544,10 +544,23 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 1. 获取 自适应拓展 的 入口方法
+     * 2. 首先会检查缓存，缓存未命中，则调用 createAdaptiveExtension 方法创建自适应拓展
+     * 3. Dubbo 中有两种类型的自适应拓展，
+     *      3.1 一种是手工编码的，
+     *      3.2 一种是自动生成的。
+     * 4. 手工编码的自适应拓展中可能存在着一些依赖，
+     * 5. 而自动生成的 Adaptive 拓展则不会依赖其他类。
+     * 6. 这里调用 injectExtension 方法的目的是为手工编码的自适应拓展注入依赖，这一点需要大家注意一下
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public T getAdaptiveExtension() {
+        // 从缓存中获取自适应拓展
         Object instance = cachedAdaptiveInstance.get();
         if (instance == null) {
+            // 缓存未命中
             if (createAdaptiveInstanceError != null) {
                 throw new IllegalStateException("Failed to create adaptive instance: " +
                         createAdaptiveInstanceError.toString(),
@@ -558,7 +571,9 @@ public class ExtensionLoader<T> {
                 instance = cachedAdaptiveInstance.get();
                 if (instance == null) {
                     try {
+                        // 创建自适应拓展
                         instance = createAdaptiveExtension();
+                        // 设置自适应拓展到缓存中
                         cachedAdaptiveInstance.set(instance);
                     } catch (Throwable t) {
                         createAdaptiveInstanceError = t;
@@ -906,6 +921,7 @@ public class ExtensionLoader<T> {
                     + clazz.getName() + " is not subtype of interface.");
         }
         // 检测目标类上是否有 Adaptive 注解
+        // 在获取实现类的过程中，如果某个实现类被 Adaptive 注解修饰了，那么该类就会被赋值给 cachedAdaptiveClass 变量
         if (clazz.isAnnotationPresent(Adaptive.class)) {
             // 设置 cachedAdaptiveClass缓存
             cacheAdaptiveClass(clazz);
@@ -1035,27 +1051,57 @@ public class ExtensionLoader<T> {
         return name.toLowerCase();
     }
 
+    /**
+     * TODO 20201114 看到 这
+     * 创建自适应拓展
+     * 包含三个逻辑
+     * 1. 调用 getAdaptiveExtensionClass 方法获取自适应拓展 Class 对象
+     * 2. 通过反射进行实例化
+     * 3. 调用 injectExtension 方法向拓展实例中注入依赖
+     * @return
+     */
     @SuppressWarnings("unchecked")
     private T createAdaptiveExtension() {
         try {
+            // 获取自适应拓展类，并通过反射实例化
             return injectExtension((T) getAdaptiveExtensionClass().newInstance());
         } catch (Exception e) {
             throw new IllegalStateException("Can't create adaptive extension " + type + ", cause: " + e.getMessage(), e);
         }
     }
 
+    /**
+     * 1. 调用 getExtensionClasses 获取所有的拓展类
+     * 2. 检查缓存，若缓存不为空，则返回缓存
+     * 3. 若缓存为空，则调用 createAdaptiveExtensionClass 创建自适应拓展类
+     * 4. 在获取实现类的过程中，如果某个实现类被 Adaptive 注解修饰了，那么该类就会被赋值给 cachedAdaptiveClass 变量
+     * 5. 如果缓存中（cachedAdaptiveClass != null） 存在 ，则 直接返回 cachedAdaptiveClass
+     * 6. 如果所有的实现类均未被 Adaptive 注解修饰，那么执行第三步逻辑，创建自适应拓展类
+     * @return
+     */
     private Class<?> getAdaptiveExtensionClass() {
+        // 通过 SPI 获取所有的拓展类
         getExtensionClasses();
+        // 检查缓存，若缓存不为空，则直接返回缓存
         if (cachedAdaptiveClass != null) {
             return cachedAdaptiveClass;
         }
+        // 创建自适应拓展类
         return cachedAdaptiveClass = createAdaptiveExtensionClass();
     }
 
+    /**
+     * 1. 用于生成自适应拓展类，
+     * 2. 该方法首先会生成自适应拓展类的源码，然后通过 Compiler 实例（Dubbo 默认使用 javassist 作为编译器）编译源码，得到代理类 Class 实例
+     * @return
+     */
     private Class<?> createAdaptiveExtensionClass() {
+        // 构建自适应拓展代码
         String code = new AdaptiveClassCodeGenerator(type, cachedDefaultName).generate();
         ClassLoader classLoader = findClassLoader();
+        // 获取编译器实现类
         org.apache.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(org.apache.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();
+        // 编译代码，生成 Class
         return compiler.compile(code, classLoader);
     }
 
