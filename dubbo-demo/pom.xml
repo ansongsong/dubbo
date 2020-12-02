@@ -41,6 +41,10 @@
         <module>dubbo-call-scdubbo</module>
         <module>sc-call-dubbo</module>
         <module>dubbo-demo-spi</module>
+        <module>xiaoan-demo-client</module>
+        <module>xiaoan-demo-consumer-1</module>
+        <module>xiaoan-demo-provider-1</module>
+
     </modules>
 
     <dependencyManagement>

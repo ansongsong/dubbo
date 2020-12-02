@@ -41,7 +41,7 @@ public interface Directory<T> extends Node {
 
     /**
      * list invokers.
-     *
+     * 用于列举 Invoker
      * @return invokers
      */
     List<Invoker<T>> list(Invocation invocation) throws RpcException;

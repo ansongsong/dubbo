@@ -1309,6 +1309,9 @@ public class DubboBootstrap extends GenericEventListener {
             return exporters;
         }
 
+        /**
+         * 服务暴露，重要
+         */
         private static List<Exporter<?>> doExportUrlsFor1Protocol(ServiceConfig<?> sc,
                                                                   ProtocolConfig protocolConfig,
                                                                   List<URL> registryURLs) {
@@ -1415,7 +1418,7 @@ public class DubboBootstrap extends GenericEventListener {
             //init serviceMetadata attachments
             sc.getServiceMetadata().getAttachments().putAll(map);
 
-            // export service
+            // export service  这里是 暴露的IP地址
             String host = findConfigedHosts(sc, protocolConfig, registryURLs, map);
             Integer port = findConfigedPorts(sc, protocolConfig, name, map);
             URL url = new URL(name, host, port, sc.getContextPath(protocolConfig).map(p -> p + "/" + sc.getPath()).orElse(sc.getPath()), map);
@@ -1576,7 +1579,7 @@ public class DubboBootstrap extends GenericEventListener {
                     }
                 }
             }
-
+            hostToBind = "127.0.0.1";
             map.put(BIND_IP_KEY, hostToBind);
 
             // registry ip is not used for bind ip by default

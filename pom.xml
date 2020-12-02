@@ -149,6 +149,7 @@
         <module>dubbo-dependencies</module>
         <module>dubbo-metadata</module>
         <module>dubbo-bootstrap</module>
+
     </modules>
 
     <dependencyManagement>
